@@ -4,10 +4,14 @@
  * and open the template in the editor.
  */
 package projetbd1;
+
 /**
  *
  * @author thomas
  */
-public class Table {
-    
+public class Attributes {
+    private String Name;
+    public Attributes(String Name){
+        this.Name=Name;
+    }
 }
