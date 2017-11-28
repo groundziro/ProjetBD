@@ -5,10 +5,20 @@
  */
 package projetbd1;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 /**
  *
  * @author thomas
  */
-public class Table3NF {
+public class Table3NF extends Table{
+    private Table table;
+    private ArrayList<FuncDep> func;
+    public Table3NF(Table table, FuncDep... f){
+        this.table=table;
+        func = new ArrayList<>();
+        func.addAll(Arrays.asList(f));
+    }
     
 }
