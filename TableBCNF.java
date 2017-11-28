@@ -8,6 +8,12 @@ package projetbd1;
  *
  * @author thomas
  */
-public class TableBCNF {
+public class TableBCNF extends Table3NF{
+    private Table table;
+    private FuncDep func;
+    public TableBCNF(Table table){
+        super(table);
+    }
+    
     
 }
