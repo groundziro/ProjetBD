@@ -22,7 +22,7 @@ public class Attributes<E> {
         values = new ArrayList<>();
         values.addAll(Arrays.asList(value));
     }
-
+//COMMENTAIRE DE CORENTIN POUR TRY FORK ET MERGE
     /**
      *
      * @return Tableau des valeurs "values" de l'attribut.
