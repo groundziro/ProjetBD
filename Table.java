@@ -4,10 +4,18 @@
  * and open the template in the editor.
  */
 package projetbd1;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
 /**
  *
  * @author thomas
  */
 public class Table {
-    
+    private ArrayList<Attributes> attributes;
+    public Table(Attributes... attr){
+        attributes = new ArrayList<>();
+        attributes.addAll(Arrays.asList(attr));
+    }
 }
