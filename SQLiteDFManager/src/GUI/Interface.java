@@ -34,6 +34,13 @@ public class Interface extends Application {
     @Override
     public void start(Stage primaryStage) {
         Button Browse = new Button("Browse");
+        BorderPane root = new BorderPane();
+        Region up = new Region();
+        up.setPrefSize(100,50);
+        root.setCenter(Browse);
+        root.setTop(up);
+        Scene scene = new Scene(root);
+        primaryStage.setScene(scene);
         Browse.setOnAction(actionEvent->{
             FileChooser choose = new FileChooser();
             choose.getExtensionFilters().add(new ExtensionFilter("DataBases","*.db"));
@@ -46,7 +53,11 @@ public class Interface extends Application {
                 System.out.println(e.getMessage());
             }
             Button Add = new Button("Add DF");
-            p.setBottom(new HBox(Add));
+            Button Exit = new Button("Exit");
+            Exit.setOnAction(quit->{
+                primaryStage.setScene(scene);
+            });
+            p.setBottom(new HBox(Add,Exit));
             try{
                 p.setCenter(current(dfs));
             }catch(SQLException e){
@@ -55,13 +66,6 @@ public class Interface extends Application {
             Scene Tables = new Scene(p);
             primaryStage.setScene(Tables);
         });
-        BorderPane root = new BorderPane();
-        Region up = new Region();
-        up.setPrefSize(100,50);
-        root.setCenter(Browse);
-        root.setTop(up);
-        Scene scene = new Scene(root);
-        primaryStage.setScene(scene);
         primaryStage.show();
     }
     
