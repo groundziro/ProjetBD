@@ -159,13 +159,14 @@ public class DBManager {
         return result;
     }
     
-    public void getDFs() throws SQLException{
+    public List<DF> getDFs() throws SQLException{
         ResultSet rs = getTableDatas("FuncDep");
         ArrayList<DF> dfResult=new ArrayList<>();
         while(rs.next()){
-            //dfResult.add(new DF())
-            System.out.println(""+rs.getObject(1)+":"+rs.getObject(2)+":"+rs.getObject(3));
+            dfResult.add(new DF((String)rs.getObject(1),(String)rs.getObject(2),(String)rs.getObject(3)));
+            //System.out.println(""+rs.getObject(1)+":"+rs.getObject(2)+"->"+rs.getObject(3));
         }
+        return dfResult;
     }
 
     /**
@@ -236,10 +237,7 @@ public class DBManager {
             System.out.println(e.getMessage());
         }
     }
-    
-    
-
-    
+  
     public void updateData(int id, String name, double capacity){
         String sqlcmd="UPDATE table1 SET name = ?,"+
                       "capacity = ?"+

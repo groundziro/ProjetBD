@@ -36,7 +36,7 @@ public class DFManager {
         checkFuncDep();
     }
 
-    public boolean checkFuncDep() throws SQLException{
+    public final boolean checkFuncDep() throws SQLException{
         dbc.createNewTable("FuncDep","tableName text","lhs text","rhs integer","PRIMARY KEY (tableName,lhs,rhs)");
         return dbc.isEmpty("FuncDep"); 
     }
@@ -48,19 +48,20 @@ public class DFManager {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws SQLException {
-      /*  DFManager dfm = new DFManager("test.db");
-        try{
-           System.out.println(dfm.checkFuncDep());
+        DFManager dfm = new DFManager("test.db");
+        List<DF> df = dfm.getDFs();
+        for(int i=0;i<df.size();i++){
+            System.out.print(""+df.get(i).getTableName()+" : ");
+            System.out.println(df.get(i).toString());
         }
-        catch(SQLException e){
-            System.out.println(e.getMessage());
-        }
-        */
+        
+        
+      /*
         System.out.println("ok");
         DBManager dbc= new DBManager("test.db");
         dbc.getTabNames();
         System.out.println("oooooooooooooooook");
-        dbc.getDFs();
+        dbc.getDFs();*/
         //dbc.createNewTable("bananes","colour text","type text","tasteval integer","avweight real","PRIMARY KEY (colour,type)");
          // dbc.check();
         //dbc.createNewTable("warehouse","id integer PRIMARY KEY","name text NOT NULL","capacity real");
