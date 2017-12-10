@@ -8,6 +8,7 @@ package main;
 //import static main.SQLiteConnector.createNewDB;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -21,6 +22,31 @@ public class DFManager {
     public DFManager(DBManager dbc) throws SQLException {
         this.dbc = dbc;
         checkFuncDep();
+    }
+   
+    /**
+     * Take en ArrayList of DF and give an ArrayList of ArrayList of dF.
+     * Each ArrayList(second level) of DF countains DF of the same table.
+     * @param lis
+     * @return
+     */
+    public static ArrayList<ArrayList<DF>> oderDFList(List<DF> lis){
+        int tabl;
+        ArrayList<ArrayList<DF>> result= new ArrayList<>();
+        for(DF cur: lis){
+            tabl=-1;
+               //Check in wich ArrayList (first level) cur should go
+            for(int i=0;i<result.size();i++){
+                if(result.get(i).get(0).getTableName().equals(cur.getTableName())) 
+                    tabl=i;
+            }
+            if(tabl==-1){
+                result.add(new ArrayList<DF>());
+                tabl=result.size()-1;
+            }
+            result.get(tabl).add(cur);
+        }
+        return result;
     }
     
     public List<String> getTabNames() throws SQLException{
@@ -50,11 +76,24 @@ public class DFManager {
     public static void main(String[] args) throws SQLException {
         DFManager dfm = new DFManager("test.db");
         List<DF> df = dfm.getDFs();
+        
+        System.out.println("\n*.BEFORE THE SORT.*\n");
+        
         for(int i=0;i<df.size();i++){
             System.out.print(""+df.get(i).getTableName()+" : ");
             System.out.println(df.get(i).toString());
         }
         
+        System.out.println("\n*.AFTER THE SORT.*\n");
+        
+        ArrayList<ArrayList<DF>> sorted= oderDFList(df);
+        
+        for(int i=0;i<sorted.size();i++){
+            System.out.println("--table: "+sorted.get(i).get(0).getTableName());
+            for(int j=0;j<sorted.get(i).size();j++){
+                System.out.println("     "+sorted.get(i).get(j));
+            }
+        }
         
       /*
         System.out.println("ok");
