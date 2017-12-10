@@ -44,7 +44,7 @@ public class DFManager {
         }
         
         
-        //DBManager dbc= new DBManager("test.db");
+        DBManager dbc= new DBManager("test.db");
         //dbc.createNewTable("bananes","colour text","type text","tasteval integer","avweight real","PRIMARY KEY (colour,type)");
          // dbc.check();
         //dbc.createNewTable("warehouse","id integer PRIMARY KEY","name text NOT NULL","capacity real");
@@ -54,7 +54,7 @@ public class DFManager {
         
       //dbc.deleteData("bananes","avweight,colour,tasteval",8.6,"blue",5);
         //dbc.deleteData("bananes","tasteval",2);
-      //dbc.printTable("bananes");
+      dbc.printTable("bananes");
         //dbc.isEmpty("bananes");
         //dbc.kedis();
         

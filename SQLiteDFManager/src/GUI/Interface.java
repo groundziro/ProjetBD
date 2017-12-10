@@ -47,7 +47,8 @@ public class Interface extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Application.launch(args);
+        //Application.launch(args);
+        System.out.println("ok");
     }
     
 }
