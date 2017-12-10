@@ -8,6 +8,7 @@ package GUI;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -47,7 +48,7 @@ public class Interface extends Application {
             Button Add = new Button("Add DF");
             p.setBottom(new HBox(Add));
             try{
-            p.setCenter(current(dfs));
+                p.setCenter(current(dfs));
             }catch(SQLException e){
                 System.out.println(e.getMessage());
             }
@@ -64,7 +65,7 @@ public class Interface extends Application {
         primaryStage.show();
     }
     
-    private Text current(DFManager df) throws SQLException{
+    /*private Text current(DFManager df) throws SQLException{
         Text txt = new Text();
         String str=" ";
         for(String table: df.getTabNames()){
@@ -72,6 +73,19 @@ public class Interface extends Application {
             for(DF func : df.getDFs()){
                 str+="\t"+func.toString()+"\n";
             }            
+        }
+        txt.setText(str);
+        return txt;
+    }*/
+    private Text current(DFManager df) throws SQLException{
+        Text txt = new Text();
+        String str="";
+        ArrayList<ArrayList<DF>> array = DFManager.orderDFList(df.getDFs());
+        for(ArrayList<DF> table : array){
+            str+= table.get(0).getTableName()+":\n";
+            for(DF func : table){
+                str+="\t"+func.toString()+"\n";
+            }
         }
         txt.setText(str);
         return txt;

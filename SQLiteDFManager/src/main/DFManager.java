@@ -86,7 +86,7 @@ public class DFManager {
         
         System.out.println("\n*.AFTER THE SORT.*\n");
         
-        ArrayList<ArrayList<DF>> sorted= oderDFList(df);
+        ArrayList<ArrayList<DF>> sorted= orderDFList(df);
         
         for(int i=0;i<sorted.size();i++){
             System.out.println("--table: "+sorted.get(i).get(0).getTableName());
