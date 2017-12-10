@@ -36,6 +36,12 @@ public class DF {
     public String toString() {
         return ""+lhs+" -> "+ rhs;
     }
-    
+     public void setLhs(String lhs) {
+        this.lhs = lhs;
+    }
+
+    public void setRhs(String rhs) {
+        this.rhs = rhs;
+    }
     
 }

@@ -33,7 +33,7 @@ import main.DFManager;
  * @author Thomas
  */
 public class Interface extends Application {
-    
+    private DFManager dfs = null;
     @Override
     public void start(Stage primaryStage) {
         Button Browse = new Button("Browse");
@@ -52,7 +52,6 @@ public class Interface extends Application {
                 choose.getExtensionFilters().add(new ExtensionFilter("DataBases","*.db"));
                 File result = choose.showOpenDialog(primaryStage);
                 BorderPane p = new BorderPane();
-                DFManager dfs = null;
                 try{
                     dfs = new DFManager(result.getAbsolutePath());
                 }catch(SQLException e){
@@ -62,7 +61,7 @@ public class Interface extends Application {
                 List<Button> dfBtns = new ArrayList<>();
                 try{
                     for(DF df : dfs.getDFs()){
-                        btns.add(new Button(df.toString()));
+                        dfBtns.add(new Button(df.toString()));
                     }
                 }catch(SQLException ex){
                     System.out.println(ex.getMessage());
@@ -79,26 +78,30 @@ public class Interface extends Application {
                 Button Check = new Button("Check...");
                 Button Modify = new Button("Modify...");
                 Button Delete = new Button("Delete...");
-                Delete.setOnAction((ActionEvent del)->{
-                    VBox v = new VBox();
-                    for(Button b : dfBtns){
-                        b.setOnAction(del1->{
-                            dfs.getDFs().remove(df);
-                        });
-                        v.getChildren().add(b);
-                    }
-                   choice.setCenter(v);
-                   primaryStage.setScene(new Scene(choice));
-                });
                 Modify.setOnAction(mod->{
                     VBox v = new VBox();
                     for(Button b : dfBtns){
+                        b.setOnAction(mod1->{
+                            modify(b.getText());
+                        });
                         v.getChildren().add(b);
                     }
                    choice.setCenter(v);
                 });
                 Exit.setOnAction(quit->{
                     primaryStage.setScene(scene);
+                });
+                Delete.setOnAction((ActionEvent del)->{
+                    VBox v = new VBox();
+                    for(Button b : dfBtns){
+                        b.setOnAction((ActionEvent del1)->{
+                            
+                        });
+                        v.getChildren().add(b);
+                    }
+                   choice.setCenter(v);
+                   choice.setBottom(Exit);
+                   primaryStage.setScene(new Scene(choice));
                 });
                 p.setBottom(new HBox(Add,Exit,Check,Modify,Delete));
                 try{
@@ -150,11 +153,11 @@ public class Interface extends Application {
         txt.setText(str);
         return txt;
     }
-    private void initVBox(VBox v, DFManager dfs)throws SQLException{
-        for(DF df : dfs.getDFs()){
-            Button b = new Button(df.toString());
-            v.getChildren().add(b);
-        }
+    private void modify(String df){
+        for() 
+    }
+    private void delete(String df){
+        for()
     }
     private boolean check3NF(String table){
         return DF.check3NF(table);
