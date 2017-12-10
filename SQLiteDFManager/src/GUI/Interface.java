@@ -54,14 +54,15 @@ public class Interface extends Application {
     }
     private Text current(DFManager df){
         Text txt = new Text();
-        String str="";
+        String str=" ";
         for(Table table: df.getDB().getTables()){
             str+=table.toString()+":\n";
             for(FuncDep df: table.getFuncDep()){
                 str+="\t"+df.toString()+"\n";
             }
         }
-        return txt.setText(str);
+        txt.setText(str);
+        return txt;
     }
     /**
      * @param args the command line arguments
