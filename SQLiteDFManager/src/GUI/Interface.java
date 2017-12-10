@@ -17,6 +17,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -78,15 +79,42 @@ public class Interface extends Application {
                 Button Check = new Button("Check...");
                 Button Modify = new Button("Modify...");
                 Button Delete = new Button("Delete...");
+                Add.setOnAction(add->{
+                    HBox h = new HBox();
+                    TextField table = new TextField("Table");
+                    TextField lhs = new TextField("LeftHandSide");
+                    TextField rhs = new TextField("RightHandSide");
+                    h.getChildren().addAll(table,lhs,rhs);
+                    Button confirm = new Button("Confirm");
+                    confirm.setOnAction(confirmed->{
+                        try {
+                            add(table.getText(),lhs.getText(),rhs.getText());
+                        } catch (SQLException ex) {
+                            System.out.println(ex.getMessage());
+                        }
+                    });
+                    choice.setCenter(table);
+                    choice.setBottom(confirm);
+                });
                 Modify.setOnAction(mod->{
                     VBox v = new VBox();
+                    HBox h = new HBox();
+                    TextField lhs = new TextField("LeftHandSide");
+                    TextField rhs = new TextField("RightHandSide");
+                    h.getChildren().addAll(lhs,rhs);
                     for(Button b : dfBtns){
                         b.setOnAction(mod1->{
-                            modify(b.getText());
+                            try {
+                                modify(b.getText(),lhs.getText(),rhs.getText());
+                            } catch (SQLException ex) {
+                                System.out.println(ex.getMessage());
+                            }
                         });
                         v.getChildren().add(b);
                     }
+                   choice.setTop(h);
                    choice.setCenter(v);
+                   primaryStage.setScene(new Scene(choice));
                 });
                 Exit.setOnAction(quit->{
                     primaryStage.setScene(scene);
@@ -95,7 +123,11 @@ public class Interface extends Application {
                     VBox v = new VBox();
                     for(Button b : dfBtns){
                         b.setOnAction((ActionEvent del1)->{
-                            
+                            try {
+                                delete(b.getText());
+                            } catch (SQLException ex) {
+                                System.out.println(ex.getMessage());
+                            }
                         });
                         v.getChildren().add(b);
                     }
@@ -153,11 +185,27 @@ public class Interface extends Application {
         txt.setText(str);
         return txt;
     }
-    private void modify(String df){
-        for() 
+    private void add(String table,String lhs,String rhs)throws SQLException{
+        if(!dfs.getTabNames().contains(table))
+            return;
+        DF newFunc = new DF(table,lhs,rhs);
+        dfs.getDFs().add(newFunc);
     }
-    private void delete(String df){
-        for()
+    private void modify(String df,String lhs,String rhs)throws SQLException{
+        for(DF func : dfs.getDFs()){
+            if(func.toString().equals(df)){
+                DF newFunc = new DF(func.getTableName(),lhs,rhs);
+                dfs.getDFs().add(dfs.getDFs().indexOf(func), newFunc);
+                dfs.getDFs().remove(func);
+            }
+        } 
+    }
+    private void delete(String df)throws SQLException{
+        for(DF func : dfs.getDFs()){
+            if(func.toString().equals(df)){
+                dfs.getDFs().remove(func);
+            }
+        }
     }
     private boolean check3NF(String table){
         return DF.check3NF(table);
