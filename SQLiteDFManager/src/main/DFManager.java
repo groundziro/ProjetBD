@@ -18,7 +18,7 @@ public class DFManager {
     DBManager dbc;
 
     public DFManager(DBManager dbc) {
-        dbc = dbc;
+        this.dbc = dbc;
     }
     
     public DFManager(String path) {
@@ -29,7 +29,9 @@ public class DFManager {
         dbc.createNewTable("FuncDep","tableName text","lhs text","rhs integer","PRIMARY KEY (tableName,lhs,rhs)");
         return dbc.isEmpty("FuncDep"); 
     }
-    
+    public DBManager getDB(){
+        return dbc;
+    }
     /**
      * @param args the command line arguments
      */

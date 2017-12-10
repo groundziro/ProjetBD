@@ -13,11 +13,14 @@ import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import main.DFManager;
 
 /**
  *
@@ -32,6 +35,13 @@ public class Interface extends Application {
             FileChooser choose = new FileChooser();
             choose.getExtensionFilters().add(new ExtensionFilter("DataBases","*.db"));
             File result = choose.showOpenDialog(primaryStage);
+            BorderPane p = new BorderPane();
+            DFManager DFs = new DFManager(result.getAbsolutePath());
+            Button Add = new Button("Add DF");
+            p.setBottom(new HBox(Add));
+            p.setCenter(current(DFs));
+            Scene Tables = new Scene(p);
+            primaryStage.setScene(Tables);
         });
         BorderPane root = new BorderPane();
         Region up = new Region();
@@ -42,7 +52,17 @@ public class Interface extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
     }
-
+    private Text current(DFManager df){
+        Text txt = new Text();
+        String str="";
+        for(Table table: df.getDB().getTables()){
+            str+=table.toString()+":\n";
+            for(FuncDep df: table.getFuncDep()){
+                str+="\t"+df.toString()+"\n";
+            }
+        }
+        return txt.setText(str);
+    }
     /**
      * @param args the command line arguments
      */
