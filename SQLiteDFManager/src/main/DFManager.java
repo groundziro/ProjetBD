@@ -7,41 +7,54 @@ package main;
 
 //import static main.SQLiteConnector.createNewDB;
 
+import java.sql.SQLException;
+
+
 /**
  *
  * @author Alfatta
  */
-public class SQLiteDFManager {
+public class DFManager {
     DBManager dbc;
 
-    public SQLiteDFManager(DBManager dbc) {
+    public DFManager(DBManager dbc) {
         dbc = dbc;
     }
     
-    public SQLiteDFManager(String path) {
+    public DFManager(String path) {
         dbc = new DBManager(path);
     }
 
-    public boolean checkFuncDep(){
-        dbc.createNewTable("FuncDep","table text","lhs text","rhs integer","PRIMARY KEY (table,lhs,rhs)");
-        return true;
+    public boolean checkFuncDep() throws SQLException{
+        dbc.createNewTable("FuncDep","tableName text","lhs text","rhs integer","PRIMARY KEY (tableName,lhs,rhs)");
+        return dbc.isEmpty("FuncDep"); 
     }
     
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        DBManager dbc= new DBManager("MAZ.db");
+        DFManager dfm = new DFManager("test.db");
+        try{
+           System.out.println(dfm.checkFuncDep());
+        }
+        catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        
+        
+        //DBManager dbc= new DBManager("test.db");
         //dbc.createNewTable("bananes","colour text","type text","tasteval integer","avweight real","PRIMARY KEY (colour,type)");
          // dbc.check();
         //dbc.createNewTable("warehouse","id integer PRIMARY KEY","name text NOT NULL","capacity real");
         //dbc.insertData("warehouse","name,capacity","N2",(double)222.2);
         //dbc.insertData("warehouse","capacity,name","N3",(double)333.3);
-        //dbc.insertData("bananes", "avweight,colour,type,tasteval",1.1,"orange","miam",8);
+        //dbc.insertData("bananes", "avweight,colour,type,tasteval",1.1,"noir","miam",8);
         
       //dbc.deleteData("bananes","avweight,colour,tasteval",8.6,"blue",5);
         //dbc.deleteData("bananes","tasteval",2);
-        //dbc.printTable("warehouse");
+      //dbc.printTable("bananes");
+        //dbc.isEmpty("bananes");
         //dbc.kedis();
         
         //connect();

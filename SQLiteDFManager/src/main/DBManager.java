@@ -76,8 +76,7 @@ public class DBManager {
             //removing ",\n" at the end
         tablecraft=tablecraft.substring(0,tablecraft.length()-2); 
         tablecraft=tablecraft+"\n);";
-        System.out.println(tablecraft);
-        System.out.println("-------");
+        System.out.println(tablecraft+"\n ------");
         executeStatement(tablecraft);
     }
     
@@ -146,22 +145,18 @@ public class DBManager {
         executeStatement(sqlStm);
     }
     
-    /*
-    public void deleteData(String table, String attributes, int id, Object... values){
-        String sqlcmd="DELETE FROM table1 WHERE id = ?";
-        try{
-            Connection conn=connect("bob.db");
-            PreparedStatement pstmt=conn.prepareStatement(sqlcmd);
-            pstmt.setInt(1,id);
-            pstmt.executeUpdate();
-        }
-        catch(SQLException e){
-            System.out.println(e.getMessage());
-        }
-    }
-    */
+   
+
+    /**
+     * Get a list of all the attributes name of one table. 
+     * The list is sorted by the unnamed perspective order
+     * @param table
+     * @return The list of the attributes names
+     * @throws SQLException
+     */
+
     
-    public List getColNames(String table) throws SQLException{
+    public List<String> getColNames(String table) throws SQLException{
         String sqlStm="PRAGMA table_info(warehouse);";
         Statement stmt=conn.createStatement();
         ResultSet rs=stmt.executeQuery(sqlStm);
@@ -172,16 +167,44 @@ public class DBManager {
         return result;
     }
     
-    public void printTable(String table){
+    /**
+     * Return a ResultSet containing all the tuples the table contains (unnamed perspective)
+     * @param table
+     * @return
+     * @throws SQLException
+     */
+    public ResultSet getTableDatas(String table) throws SQLException{
         String sqlStm="SELECT * FROM "+table;
+        Statement stmt=conn.createStatement();
+        ResultSet rs=stmt.executeQuery(sqlStm);
+        return rs;        
+    }
+    
+    public int tableSize(String table) throws SQLException{
+         //We are not using getTableDatas then counting the number of values in the ResultSet
+         //because it would read the entire ResultSet only to count the number of entries
+        String sqlStm="SELECT COUNT(*) FROM "+table;
+        
+        Statement stmt=conn.createStatement();
+        ResultSet rs=stmt.executeQuery(sqlStm);
+        return rs.getInt(1);
+    }
+    
+    public boolean isEmpty(String table) throws SQLException{
+        if(tableSize(table) == 0)
+            return true;
+        else
+            return false;
+    }
+    
+    public void printTable(String table){
         try{
             List cn = getColNames(table);
             for(int i=0;i<cn.size();i++){
                 System.out.print(cn.get(i)+"\t");
             }
-            System.out.println("\n---------------------");
-            Statement stmt=conn.createStatement();
-            ResultSet rs=stmt.executeQuery(sqlStm);
+            System.out.println("\n-------------------------");
+            ResultSet rs=getTableDatas(table);
             while(rs.next()){
                 for(int i=0;i<cn.size();i++){
                     System.out.print(rs.getObject(i+1)+"\t");
@@ -193,6 +216,7 @@ public class DBManager {
             System.out.println(e.getMessage());
         }
     }
+    
     
 
     
@@ -217,7 +241,20 @@ public class DBManager {
 
     
 
-    
+     /*
+    public void deleteData(String table, String attributes, int id, Object... values){
+        String sqlcmd="DELETE FROM table1 WHERE id = ?";
+        try{
+            Connection conn=connect("bob.db");
+            PreparedStatement pstmt=conn.prepareStatement(sqlcmd);
+            pstmt.setInt(1,id);
+            pstmt.executeUpdate();
+        }
+        catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
+    */
     
     /*  
     public static void main(String[] args) {
