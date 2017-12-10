@@ -19,19 +19,20 @@ import java.util.List;
  * A DBController is connected to one (or zero) DB at a given time
  * @author Alfatta
  */
-public class DBController {
+public class DBManager {
 
     Connection conn;
     
-    public DBController(String path) {
+    public DBManager(String path) {
         conn=connect(path);
     }
     
     /**
      * Connect the DBController with a DB.
      * Not recommanded if the current DBController instance is already connected to a DB.
-     * This also create an empty DB if there is nothing at path
+     * This also create an empty DB if there is no DB found.
      * @param path should be the path to the DB. absolute or relative path are both acceptable
+     * @return a SQLite DB connection
      */
     public Connection connect(String path){
         Connection conn=null;
@@ -73,9 +74,10 @@ public class DBController {
             tablecraft=tablecraft+" "+entry+",\n";
         }
             //removing ",\n" at the end
-        tablecraft=tablecraft.substring(0,tablecraft.length()-3); 
+        tablecraft=tablecraft.substring(0,tablecraft.length()-2); 
         tablecraft=tablecraft+"\n);";
-        //System.out.println(tablecraft);
+        System.out.println(tablecraft);
+        System.out.println("-------");
         executeStatement(tablecraft);
     }
     
@@ -108,12 +110,12 @@ public class DBController {
             //removing the last ","
         sqlStm=sqlStm.substring(0,sqlStm.length()-1);
         sqlStm=sqlStm+")";
-        System.out.println(sqlStm);
+        //System.out.println(sqlStm);
         try{
             PreparedStatement pstmt=conn.prepareStatement(sqlStm);
             String[] parts = attributes.split(",");
             for(int i=0;i<parts.length;i++){
-               System.out.println(""+i+" : "+values[i]);
+               //System.out.println(""+i+" : "+values[i]);
                pstmt.setObject(i+1,values[i]);
             }
             pstmt.executeUpdate();
@@ -123,7 +125,41 @@ public class DBController {
         }
     }
      
-
+    /**
+     * Delete entries from the DB. Only accept equality conditions
+     * @param table
+     * @param attribute
+     * @param value
+     */
+    public void deleteData(String table, String attributes, Object... values){
+        String sqlStm="DELETE FROM "+table+" WHERE ("+attributes+")= (";
+        for(int i=0;i<values.length;i++){
+            if(values[i].getClass()==String.class)
+                sqlStm=sqlStm+"'"+(String)values[i]+"',";
+            else
+                sqlStm=sqlStm+values[i].toString()+",";
+        }
+            //removing the last ","
+        sqlStm=sqlStm.substring(0,sqlStm.length()-1);
+        sqlStm=sqlStm+");";
+        System.out.println(sqlStm);
+        executeStatement(sqlStm);
+    }
+    
+    /*
+    public void deleteData(String table, String attributes, int id, Object... values){
+        String sqlcmd="DELETE FROM table1 WHERE id = ?";
+        try{
+            Connection conn=connect("bob.db");
+            PreparedStatement pstmt=conn.prepareStatement(sqlcmd);
+            pstmt.setInt(1,id);
+            pstmt.executeUpdate();
+        }
+        catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
+    */
     
     public List getColNames(String table) throws SQLException{
         String sqlStm="PRAGMA table_info(warehouse);";
@@ -178,18 +214,7 @@ public class DBController {
     }
     
     
-    public void deleteData(int id){
-        String sqlcmd="DELETE FROM table1 WHERE id = ?";
-        try{
-            Connection conn=connect("bob.db");
-            PreparedStatement pstmt=conn.prepareStatement(sqlcmd);
-            pstmt.setInt(1,id);
-            pstmt.executeUpdate();
-        }
-        catch(SQLException e){
-            System.out.println(e.getMessage());
-        }
-    }
+
     
 
     
