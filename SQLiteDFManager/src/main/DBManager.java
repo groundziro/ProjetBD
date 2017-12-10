@@ -76,7 +76,7 @@ public class DBManager {
             //removing ",\n" at the end
         tablecraft=tablecraft.substring(0,tablecraft.length()-2); 
         tablecraft=tablecraft+"\n);";
-        System.out.println(tablecraft+"\n ------");
+        //System.out.println(tablecraft+"\n ------");
         executeStatement(tablecraft);
     }
     
