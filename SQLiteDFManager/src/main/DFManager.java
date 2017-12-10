@@ -30,7 +30,7 @@ public class DFManager {
      * @param lis
      * @return
      */
-    public static ArrayList<ArrayList<DF>> oderDFList(List<DF> lis){
+    public static ArrayList<ArrayList<DF>> orderDFList(List<DF> lis){
         int tabl;
         ArrayList<ArrayList<DF>> result= new ArrayList<>();
         for(DF cur: lis){
