@@ -8,6 +8,7 @@ package main;
 //import static main.SQLiteConnector.createNewDB;
 
 import java.sql.SQLException;
+import java.util.List;
 
 
 /**
@@ -17,12 +18,22 @@ import java.sql.SQLException;
 public class DFManager {
     DBManager dbc;
 
-    public DFManager(DBManager dbc) {
+    public DFManager(DBManager dbc) throws SQLException {
         this.dbc = dbc;
+        checkFuncDep();
     }
     
-    public DFManager(String path) {
+    public List<String> getTabNames() throws SQLException{
+        return dbc.getTabNames();
+    }    
+    
+    public List<DF> getDFs() throws SQLException{
+        return dbc.getDFs();
+    }
+    
+    public DFManager(String path) throws SQLException {
         dbc = new DBManager(path);
+        checkFuncDep();
     }
 
     public boolean checkFuncDep() throws SQLException{
@@ -32,21 +43,24 @@ public class DFManager {
     public DBManager getDB(){
         return dbc;
     }
+    
     /**
      * @param args the command line arguments
      */
-    
-    public static void main(String[] args) {
-        DFManager dfm = new DFManager("test.db");
+    public static void main(String[] args) throws SQLException {
+      /*  DFManager dfm = new DFManager("test.db");
         try{
            System.out.println(dfm.checkFuncDep());
         }
         catch(SQLException e){
             System.out.println(e.getMessage());
         }
-        
-        
+        */
+        System.out.println("ok");
         DBManager dbc= new DBManager("test.db");
+        dbc.getTabNames();
+        System.out.println("oooooooooooooooook");
+        dbc.getDFs();
         //dbc.createNewTable("bananes","colour text","type text","tasteval integer","avweight real","PRIMARY KEY (colour,type)");
          // dbc.check();
         //dbc.createNewTable("warehouse","id integer PRIMARY KEY","name text NOT NULL","capacity real");
@@ -56,7 +70,7 @@ public class DFManager {
         
       //dbc.deleteData("bananes","avweight,colour,tasteval",8.6,"blue",5);
         //dbc.deleteData("bananes","tasteval",2);
-      dbc.printTable("bananes");
+    //  dbc.printTable("bananes");
         //dbc.isEmpty("bananes");
         //dbc.kedis();
         

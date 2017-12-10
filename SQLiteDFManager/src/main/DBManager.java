@@ -59,9 +59,6 @@ public class DBManager {
     }
     
 
-    
-  
-
     /**
      * Create the SQL command to create a new table, then send it to executeStatement
      * Example use: createNewTable("warehouse","id integer PRIMARY KEY","name text NOT NULL","capacity real")
@@ -145,7 +142,31 @@ public class DBManager {
         executeStatement(sqlStm);
     }
     
-   
+    public ResultSet executeQuery(String sqlStm) throws SQLException{
+        Statement stmt=conn.createStatement();
+        ResultSet rs=stmt.executeQuery(sqlStm);
+        return rs;
+    }
+    
+    public List<String> getTabNames() throws SQLException{
+        String sqlStm="SELECT name FROM sqlite_master WHERE type='table'";
+        ResultSet rs=executeQuery(sqlStm);
+        ArrayList<String> result = new ArrayList();
+        while(rs.next()){
+            result.add((String)rs.getObject(1));
+            //System.out.println((String)rs.getObject(1));
+        }
+        return result;
+    }
+    
+    public void getDFs() throws SQLException{
+        ResultSet rs = getTableDatas("FuncDep");
+        ArrayList<DF> dfResult=new ArrayList<>();
+        while(rs.next()){
+            //dfResult.add(new DF())
+            System.out.println(""+rs.getObject(1)+":"+rs.getObject(2)+":"+rs.getObject(3));
+        }
+    }
 
     /**
      * Get a list of all the attributes name of one table. 
@@ -154,8 +175,6 @@ public class DBManager {
      * @return The list of the attributes names
      * @throws SQLException
      */
-
-    
     public List<String> getColNames(String table) throws SQLException{
         String sqlStm="PRAGMA table_info(warehouse);";
         Statement stmt=conn.createStatement();
@@ -179,6 +198,7 @@ public class DBManager {
         ResultSet rs=stmt.executeQuery(sqlStm);
         return rs;        
     }
+    
     
     public int tableSize(String table) throws SQLException{
          //We are not using getTableDatas then counting the number of values in the ResultSet

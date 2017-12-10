@@ -36,10 +36,10 @@ public class Interface extends Application {
             choose.getExtensionFilters().add(new ExtensionFilter("DataBases","*.db"));
             File result = choose.showOpenDialog(primaryStage);
             BorderPane p = new BorderPane();
-            DFManager DFs = new DFManager(result.getAbsolutePath());
+            DFManager dfs = new DFManager(result.getAbsolutePath());
             Button Add = new Button("Add DF");
             p.setBottom(new HBox(Add));
-            p.setCenter(current(DFs));
+            p.setCenter(current(dfs));
             Scene Tables = new Scene(p);
             primaryStage.setScene(Tables);
         });
@@ -52,6 +52,7 @@ public class Interface extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
     }
+    
     private Text current(DFManager df){
         Text txt = new Text();
         String str=" ";
@@ -64,12 +65,14 @@ public class Interface extends Application {
         txt.setText(str);
         return txt;
     }
+    
+    
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        //Application.launch(args);
-        System.out.println("ok");
+        Application.launch(args);
+       // System.out.println("ok");
     }
     
 }
