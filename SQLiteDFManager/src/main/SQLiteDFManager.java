@@ -5,7 +5,6 @@
  */
 package main;
 
-import static main.DBController.*;
 //import static main.SQLiteConnector.createNewDB;
 
 /**
@@ -18,6 +17,14 @@ public class SQLiteDFManager {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        DBController dbc= new DBController("test.db");
+         // dbc.check();
+        //dbc.createNewTable("warehouse","id integer PRIMARY KEY","name text NOT NULL","capacity real");
+        //dbc.insertData("warehouse","name,capacity","N2",(double)222.2);
+        //dbc.insertData("warehouse","capacity,name","N3",(double)333.3);
+        dbc.printTable("warehouse");
+        //dbc.kedis();
+        
         //connect();
         //createNewDB("bob.db");
         //createNewTable();
@@ -33,10 +40,10 @@ public class SQLiteDFManager {
         //insertData("NOUVEAU",156.5);
         //check();
         //System.out.println("---");
-        createNewTable("trully","id integer PRIMARY KEY","name text NOT NULL","capacity real");
+        //createNewTable("trully","id integer PRIMARY KEY","name text NOT NULL","capacity real");
         //createNewTable("materials","id integer PRIMARY KEY","description text NOT NULL");
         //createNewTable();
-     
+        
     }
     
 }
