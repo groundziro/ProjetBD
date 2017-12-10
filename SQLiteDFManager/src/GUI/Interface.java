@@ -7,6 +7,7 @@ package GUI;
  */
 
 import java.io.File;
+import java.sql.SQLException;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -20,6 +21,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import main.DF;
 import main.DFManager;
 
 /**
@@ -36,10 +38,19 @@ public class Interface extends Application {
             choose.getExtensionFilters().add(new ExtensionFilter("DataBases","*.db"));
             File result = choose.showOpenDialog(primaryStage);
             BorderPane p = new BorderPane();
-            DFManager dfs = new DFManager(result.getAbsolutePath());
+            DFManager dfs = null;
+            try{
+                dfs = new DFManager(result.getAbsolutePath());
+            }catch(SQLException e){
+                System.out.println(e.getMessage());
+            }
             Button Add = new Button("Add DF");
             p.setBottom(new HBox(Add));
+            try{
             p.setCenter(current(dfs));
+            }catch(SQLException e){
+                System.out.println(e.getMessage());
+            }
             Scene Tables = new Scene(p);
             primaryStage.setScene(Tables);
         });
@@ -53,14 +64,14 @@ public class Interface extends Application {
         primaryStage.show();
     }
     
-    private Text current(DFManager df){
+    private Text current(DFManager df) throws SQLException{
         Text txt = new Text();
         String str=" ";
-        for(Table table: df.getDB().getTables()){
-            str+=table.toString()+":\n";
-            for(FuncDep df: table.getFuncDep()){
-                str+="\t"+df.toString()+"\n";
-            }
+        for(String table: df.getTabNames()){
+            str+=table+":\n";          
+            for(DF func : df.getDFs()){
+                str+="\t"+func.toString()+"\n";
+            }            
         }
         txt.setText(str);
         return txt;
