@@ -31,7 +31,9 @@ public class DF {
     public String getRhs() {
         return rhs;
     }
-
+    public boolean equals(DF df){
+        return this.lhs.equals(df.lhs) && this.rhs.equals(df.rhs) && this.tableName.equals(df.tableName);
+    }
     @Override
     public String toString() {
         return ""+lhs+" -> "+ rhs;

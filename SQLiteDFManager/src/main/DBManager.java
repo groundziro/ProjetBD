@@ -124,8 +124,8 @@ public class DBManager {
     /**
      * Delete entries from the DB. Only accept equality conditions
      * @param table
-     * @param attribute
-     * @param value
+     * @param attributes
+     * @param values
      */
     public void deleteData(String table, String attributes, Object... values){
         String sqlStm="DELETE FROM "+table+" WHERE ("+attributes+")= (";
@@ -140,8 +140,14 @@ public class DBManager {
         sqlStm=sqlStm+");";
         System.out.println(sqlStm);
         executeStatement(sqlStm);
+    }/**
+     * Delete DFs.
+     * @param attributes
+     * @param values 
+     */
+    public void deleteDF(String attributes, Object... values){
+        deleteData("FuncDep",attributes,values);
     }
-    
     public ResultSet executeQuery(String sqlStm) throws SQLException{
         Statement stmt=conn.createStatement();
         ResultSet rs=stmt.executeQuery(sqlStm);
