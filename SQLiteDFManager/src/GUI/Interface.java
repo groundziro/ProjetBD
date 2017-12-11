@@ -38,7 +38,7 @@ import main.DFManager;
  */
 public class Interface extends Application {
     private DFManager dfs = null;
-    private ArrayList<String> deleted = new ArrayList<>();
+    private ArrayList<DF> deleted = new ArrayList<>();
     @Override
     public void start(Stage primaryStage) {
         Button Browse = new Button("Browse");
@@ -188,7 +188,7 @@ public class Interface extends Application {
                                                 Return.fire();
                                             }
                                         });
-                                    } catch (SQLException ex) {
+                                    }catch (SQLException ex){
                                         System.out.println(ex.getMessage());
                                     }
                                 }
@@ -238,12 +238,18 @@ public class Interface extends Application {
         for(ArrayList<DF> table : array){
             str+= table.get(0).getTableName()+":\n";
             for(DF func : table){
-                if(!deleted.contains(func.toString()))
+                if(!deleted.contains(func))
                     str+="\t"+func.toString()+"\n";
             }
         }
         txt.setText(str);
         return txt;
+    }
+    private DF getDF(String df){
+        for(DF func : dfs.getDFs()){
+            if(func.toString().equals(df))
+                return func;
+        }
     }
     private void add(DF df)throws SQLException{
         if(!dfs.getTabNames().contains(df.getTableName()))
@@ -252,22 +258,13 @@ public class Interface extends Application {
             dfs.getDFs().add(df);
     }
     private void modify(String df,String lhs,String rhs)throws SQLException{
-        for(DF func : dfs.getDFs()){
-            if(func.toString().equals(df)){
-                DF newFunc = new DF(func.getTableName(),lhs,rhs);
-                dfs.getDFs().add(dfs.getDFs().indexOf(func), newFunc);
-                dfs.getDFs().remove(func);
-            }
-        } 
+        DF value = getDF(df);
+        DF newFunc = new DF(value.getTableName(),lhs,rhs);
+        dfs.getDFs().add(dfs.getDFs().indexOf(value), newFunc);
+        delete(df);
     }
     private void delete(String df)throws SQLException{
-        for(DF func : dfs.getDFs()){
-            if(func.toString().equals(df)){
-                dfs.getDFs().remove(func);
-                deleted.add(func.toString());
-                System.out.print(dfs.getDFs().toString());
-            }
-        }
+        dfs.getDB().deleteDF("lhs rhs", );
     }
     private boolean check3NF(String table){
         //return DF.check3NF(table);
