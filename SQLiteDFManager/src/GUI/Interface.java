@@ -16,7 +16,10 @@ import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -35,10 +38,10 @@ import main.DFManager;
  */
 public class Interface extends Application {
     private DFManager dfs = null;
+    private ArrayList<String> deleted = new ArrayList<>();
     @Override
     public void start(Stage primaryStage) {
         Button Browse = new Button("Browse");
-        BorderPane choice = new BorderPane();
         BorderPane root = new BorderPane();
         Region up = new Region();
         up.setPrefSize(100,50);
@@ -52,6 +55,10 @@ public class Interface extends Application {
                 FileChooser choose = new FileChooser();
                 choose.getExtensionFilters().add(new ExtensionFilter("DataBases","*.db"));
                 File result = choose.showOpenDialog(primaryStage);
+                while(result==null){
+                    
+                    result = choose.showOpenDialog(primaryStage);
+                }
                 BorderPane p = new BorderPane();
                 try{
                     dfs = new DFManager(result.getAbsolutePath());
@@ -61,42 +68,84 @@ public class Interface extends Application {
                 List<Button> btns = new ArrayList<>();
                 List<Button> dfBtns = new ArrayList<>();
                 try{
-                    for(DF df : dfs.getDFs()){
-                        dfBtns.add(new Button(df.toString()));
+                    for(ArrayList<DF> table : DFManager.orderDFList(dfs.getDFs())){
+                        for(DF df: table){
+                            dfBtns.add(new Button(df.toString()));
+                        }
                     }
                 }catch(SQLException ex){
                     System.out.println(ex.getMessage());
                 }
                 try{
                     for(String table : dfs.getTabNames()){
+                        if(!"FuncDep".equals(table))
                         btns.add(new Button(table));
                     }
                 }catch(SQLException ex){
                     System.out.println(ex.getMessage());
                 }
+                Alert continu = new Alert(AlertType.CONFIRMATION,"Continue?");
                 Button Add = new Button("Add DF");
                 Button Exit = new Button("Exit");
                 Button Check = new Button("Check...");
                 Button Modify = new Button("Modify...");
                 Button Delete = new Button("Delete...");
+                Button Return = new Button("Return");
+                p.setBottom(new HBox(Add,Exit,Check,Modify,Delete));
+                try{
+                    p.setCenter(current(dfs));
+                }catch(SQLException e){
+                    System.out.println(e.getMessage());
+                }
+                Scene Tables = new Scene(p);
+                Return.setOnAction(back->{
+                    BorderPane newP = new BorderPane();
+                    try{
+                        newP.setCenter(current(dfs));
+                    }catch(SQLException e){
+                        System.out.println(e.getMessage());
+                    }
+                    newP.setBottom(new HBox(Add,Exit,Check,Modify,Delete));
+                    Scene newTables = new Scene(newP);
+                    primaryStage.setScene(newTables);
+                 });
                 Add.setOnAction(add->{
+                    BorderPane choice = new BorderPane();
+                    VBox v = new VBox();
                     HBox h = new HBox();
-                    TextField table = new TextField("Table");
-                    TextField lhs = new TextField("LeftHandSide");
-                    TextField rhs = new TextField("RightHandSide");
-                    h.getChildren().addAll(table,lhs,rhs);
+                    TextField table = new TextField();
+                    TextField lhs = new TextField();
+                    TextField rhs = new TextField();
+                    rhs.setPromptText("RightHandSide");
+                    table.setPromptText("Table");
+                    lhs.setPromptText("LeftHandSide");
+                    h.getChildren().addAll(lhs,rhs);
+                    v.getChildren().addAll(table,h);
                     Button confirm = new Button("Confirm");
                     confirm.setOnAction(confirmed->{
-                        try {
-                            add(table.getText(),lhs.getText(),rhs.getText());
-                        } catch (SQLException ex) {
-                            System.out.println(ex.getMessage());
-                        }
+                            DF df = new DF(table.getText(),lhs.getText(),rhs.getText());
+                            Alert alert = new Alert(AlertType.CONFIRMATION,"Do you want to add to "+table.getText()+": "+df.toString());
+                            alert.showAndWait().ifPresent(response->{
+                                if(response == ButtonType.OK){
+                                    try{
+                                        add(df);
+                                        continu.showAndWait().ifPresent(flux->{
+                                            if(flux!=ButtonType.OK)
+                                                Return.fire();
+                                        });                                        
+                                    } catch (SQLException ex) {
+                                        System.out.println(ex.getMessage());
+                                    }
+                                    
+                                }
+                            });
                     });
-                    choice.setCenter(table);
-                    choice.setBottom(confirm);
+                    choice.setCenter(v);
+                    choice.setBottom(confirm);                            
+                    primaryStage.setScene(new Scene(choice));
                 });
                 Modify.setOnAction(mod->{
+                    BorderPane choice = new BorderPane();
                     VBox v = new VBox();
                     HBox h = new HBox();
                     TextField lhs = new TextField("LeftHandSide");
@@ -106,42 +155,53 @@ public class Interface extends Application {
                         b.setOnAction(mod1->{
                             try {
                                 modify(b.getText(),lhs.getText(),rhs.getText());
+                                continu.showAndWait().ifPresent(flux->{
+                                        if(flux!=ButtonType.OK)
+                                                Return.fire();
+                                        });  
                             } catch (SQLException ex) {
                                 System.out.println(ex.getMessage());
                             }
                         });
                         v.getChildren().add(b);
                     }
-                   choice.setTop(h);
-                   choice.setCenter(v);
-                   primaryStage.setScene(new Scene(choice));
+                    choice.setCenter(v);
+                    choice.setBottom(h);
+                    primaryStage.setScene(new Scene(choice));
                 });
                 Exit.setOnAction(quit->{
                     primaryStage.setScene(scene);
                 });
                 Delete.setOnAction((ActionEvent del)->{
+                    BorderPane choice = new BorderPane();
                     VBox v = new VBox();
                     for(Button b : dfBtns){
                         b.setOnAction((ActionEvent del1)->{
-                            try {
-                                delete(b.getText());
-                            } catch (SQLException ex) {
-                                System.out.println(ex.getMessage());
-                            }
+                            Alert alert = new Alert(AlertType.CONFIRMATION,"Do you want to delete :"+b.getText()+"?");
+                            alert.showAndWait().ifPresent(response->{
+                                if(response == ButtonType.OK){
+                                    try {
+                                        delete(b.getText());
+                                        b.setVisible(false);
+                                        continu.showAndWait().ifPresent(flux->{
+                                            if(flux != ButtonType.OK){
+                                                Return.fire();
+                                            }
+                                        });
+                                    } catch (SQLException ex) {
+                                        System.out.println(ex.getMessage());
+                                    }
+                                }
+                            });                            
                         });
                         v.getChildren().add(b);
                     }
-                   choice.setCenter(v);
-                   choice.setBottom(Exit);
-                   primaryStage.setScene(new Scene(choice));
+                    choice.setCenter(v);
+                    choice.setBottom(Return);
+                    primaryStage.setScene(new Scene(choice));
                 });
-                p.setBottom(new HBox(Add,Exit,Check,Modify,Delete));
-                try{
-                    p.setCenter(current(dfs));
-                }catch(SQLException e){
-                    System.out.println(e.getMessage());
-                }
                 Check.setOnAction(check->{
+                    BorderPane choice = new BorderPane();
                     VBox v = new VBox();
                     for(Button b : btns){
                         b.setOnAction(check1->{
@@ -153,7 +213,6 @@ public class Interface extends Application {
                    choice.setCenter(v);
                    primaryStage.setScene(new Scene(choice));
                 });
-                Scene Tables = new Scene(p);
                 primaryStage.setScene(Tables);
             }
         });
@@ -179,17 +238,18 @@ public class Interface extends Application {
         for(ArrayList<DF> table : array){
             str+= table.get(0).getTableName()+":\n";
             for(DF func : table){
-                str+="\t"+func.toString()+"\n";
+                if(!deleted.contains(func.toString()))
+                    str+="\t"+func.toString()+"\n";
             }
         }
         txt.setText(str);
         return txt;
     }
-    private void add(String table,String lhs,String rhs)throws SQLException{
-        if(!dfs.getTabNames().contains(table))
+    private void add(DF df)throws SQLException{
+        if(!dfs.getTabNames().contains(df.getTableName()))
             return;
-        DF newFunc = new DF(table,lhs,rhs);
-        dfs.getDFs().add(newFunc);
+        if(!dfs.getDFs().contains(df))
+            dfs.getDFs().add(df);
     }
     private void modify(String df,String lhs,String rhs)throws SQLException{
         for(DF func : dfs.getDFs()){
@@ -204,14 +264,18 @@ public class Interface extends Application {
         for(DF func : dfs.getDFs()){
             if(func.toString().equals(df)){
                 dfs.getDFs().remove(func);
+                deleted.add(func.toString());
+                System.out.print(dfs.getDFs().toString());
             }
         }
     }
     private boolean check3NF(String table){
-        return DF.check3NF(table);
+        //return DF.check3NF(table);
+        return true;
     } 
     private boolean checkBCNF(String table){
-        return DF.checkBCNF(table);
+        //return DF.checkBCNF(table);
+        return true;
     }
     
     /**
