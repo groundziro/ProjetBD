@@ -288,7 +288,7 @@ public class Interface extends Application {
         }
     }
     private void modify(String df,String lhs,String rhs)throws SQLException{
-        DF newFunc = new DF(value.getTableName(),lhs,rhs);
+        DF newFunc = new DF(getDF(df).getTableName(),lhs,rhs);
         dfs.getDB().insertData(newFunc.getTableName(), "lhs,rhs", lhs,rhs);
         delete(df);
     }
