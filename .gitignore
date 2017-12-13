@@ -13,4 +13,4 @@ SQLiteDFManager/nbproject/private/private.xml
 SQLiteDFManager/nbproject/private/private.xml
 /SQLiteDFManager/dist/
 *.*
-!/SQLiteDFManager/nbproject/project.properties
+/SQLiteDFManager/nbproject/project.properties
