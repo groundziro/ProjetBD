@@ -183,7 +183,7 @@ public class DBManager {
      * @throws SQLException
      */
     public List<String> getColNames(String table) throws SQLException{
-        String sqlStm="PRAGMA table_info(warehouse);";
+        String sqlStm="PRAGMA table_info("+table+");";
         Statement stmt=conn.createStatement();
         ResultSet rs=stmt.executeQuery(sqlStm);
         ArrayList<String> result = new ArrayList();

@@ -162,15 +162,26 @@ public class Interface extends Application {
                     h.getChildren().addAll(lhs,rhs);
                     for(Button b : dfBtns){
                         b.setOnAction(mod1->{
-                            try {
-                                modify(b.getText(),lhs.getText(),rhs.getText());
-                                continu.showAndWait().ifPresent(flux->{
-                                        if(flux!=ButtonType.OK)
-                                                Return.fire();
-                                        });  
-                            } catch (SQLException ex) {
-                                System.out.println(ex.getMessage());
-                            }
+                            
+                                Alert alert = new Alert(AlertType.CONFIRMATION,"Would you like to modify "+b.getText()+"into "+lhs.getText()+"->"+rhs.getText());
+                                alert.showAndWait().ifPresent(cnsmr->{
+                                    try{
+                                        if(dfs.getDB().getColNames(getDF(b.getText()).getTableName()).contains(lhs.getText())&&dfs.getDB().getColNames(getDF(b.getText()).getTableName()).contains(rhs.getText())){
+                                            modify(b.getText(),lhs.getText(),rhs.getText());
+                                                continu.showAndWait().ifPresent(flux->{
+                                                if(flux!=ButtonType.OK)
+                                                    Return.fire();
+                                                });
+                                        }
+                                        else{
+                                            System.out.println(lhs.getText()+"\n"+getDF(b.getText()).getTableName()+"\n"+dfs.getDB().getColNames(getDF(b.getText()).getTableName()));
+                                            Alert warning = new Alert(AlertType.WARNING,"This FD isn't good");
+                                            warning.showAndWait();
+                                        }
+                                    } catch (SQLException ex) {
+                                        System.out.println(ex.getMessage());
+                                    }
+                                });  
                         });
                         v.getChildren().add(b);
                     }
@@ -283,7 +294,7 @@ public class Interface extends Application {
         delete(df);
     }
     private void delete(String df)throws SQLException{
-        dfs.getDB().deleteDF("lhs,rhs", df.substring(0, df.indexOf(" -")),df.substring(df.indexOf(" > ")+2));
+        dfs.getDB().deleteDF("lhs,rhs", df.substring(0, df.indexOf(" -")),df.substring(df.indexOf(">")+2));
     }
     private boolean check3NF(String table){
         //return DF.check3NF(table);
