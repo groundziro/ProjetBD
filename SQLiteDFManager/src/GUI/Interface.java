@@ -157,8 +157,10 @@ public class Interface extends Application {
                     BorderPane choice = new BorderPane();
                     VBox v = new VBox();
                     HBox h = new HBox();
-                    TextField lhs = new TextField("LeftHandSide");
-                    TextField rhs = new TextField("RightHandSide");
+                    TextField lhs = new TextField();
+                    TextField rhs = new TextField();
+                    lhs.setPromptText("LeftHandSide");
+                    rhs.setPromptText("RightHandSide");
                     h.getChildren().addAll(lhs,rhs);
                     for(Button b : dfBtns){
                         b.setOnAction(mod1->{
@@ -288,8 +290,7 @@ public class Interface extends Application {
         }
     }
     private void modify(String df,String lhs,String rhs)throws SQLException{
-        DF newFunc = new DF(getDF(df).getTableName(),lhs,rhs);
-        dfs.getDB().insertData(newFunc.getTableName(), "lhs,rhs", lhs,rhs);
+        dfs.getDB().insertData("FuncDep", "lhs,rhs", lhs,rhs);
         delete(df);
     }
     private void delete(String df)throws SQLException{
