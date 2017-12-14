@@ -286,12 +286,11 @@ public class Interface extends Application {
         if(!dfs.getTabNames().contains(df.getTableName()))
             return;
         if(dfs.getDB().getColNames(df.getTableName()).contains(df.getLhs())&&dfs.getDB().getColNames(df.getTableName()).contains(df.getRhs())){
-            dfs.getDB().insertData("FuncDep", "table1,lhs,rhs", df.getTableName(),df.getLhs(),df.getRhs());
+            dfs.getDB().insertData("FuncDep", "lhs,rhs", df.getLhs(),df.getRhs());
         }
     }
     private void modify(String df,String lhs,String rhs)throws SQLException{
-        System.out.println(getDF(df).getTableName());
-        dfs.getDB().insertData("FuncDep", "table1,lhs,rhs", getDF(df).getTableName(),lhs,rhs);
+        dfs.getDB().insertData("FuncDep", "lhs,rhs", lhs,rhs);
         delete(df);
     }
     private void delete(String df)throws SQLException{
