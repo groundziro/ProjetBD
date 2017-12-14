@@ -194,6 +194,26 @@ public class DFManager {
         deleteData(intru.getDf().getTableName(),attributes,values);
         intru.removeLh(intru.getRhconfl().get(0));
     }
+   
+    
+    //BROUILLON
+    public void deleteOneConflictedData(DFConflict intru, int id){
+        String[] cut=intru.getLhconfl().split(",");
+        Object[] values=new Object[cut.length+1];
+        for(int g=0;g<cut.length;g++){
+            values[g]=cut[g];
+        }
+        values[values.length-1]=intru.getRhconfl().get(id);
+        String attributes="";
+        String lhhs = intru.getDf().getLhs();
+        String p[]= lhhs.split(" ");
+        for(String pp : p){
+            attributes=attributes+pp+",";
+        }
+        attributes=attributes+intru.getDf().getRhs();
+        deleteData(intru.getDf().getTableName(),attributes,values);
+        intru.removeLh(intru.getRhconfl().get(id));
+    }
     
     public DBManager getDB(){
         return dbm;
