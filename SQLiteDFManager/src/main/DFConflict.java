@@ -13,28 +13,29 @@ import java.util.ArrayList;
 public class DFConflict {
     DF df;
     String message; 
-    String rh;
-    ArrayList<String> lhs;   //in case of case 1, the lhs of the tuples in conflict
-
-    public String getRh() {
-        return rh;
+    String lhconfl;
+    ArrayList<String> rhconfl;   //in case of case 1, the lhs of the tuples in conflict
+    int type;  //1=two+ tuple, 2=no attribute, 3=no table
+    
+    public String getLhconfl() {
+        return lhconfl;
     }
 
-    public ArrayList<String> getLhs() {
-        return lhs;
+    public ArrayList<String> getRhconfl() {
+        return rhconfl;
     }
 
     public int getType() {
         return type;
     }
-    int type;  //1=two+ tuple, 2=no attribute, 3=no table
+    
 
     public DFConflict(DF df, String rh, String lh1, String lh2) {
         this.df = df;
-        this.rh = rh;
-        this.lhs=new ArrayList<>();
-        lhs.add(lh1);
-        lhs.add(lh2);
+        this.lhconfl = rh;
+        this.rhconfl=new ArrayList<>();
+        rhconfl.add(lh1);
+        rhconfl.add(lh2);
         this.message = "table:"+df.getTableName()+"|df:["+df.toString()+"] but "+rh+" -> "+lh1+" and "+lh2;
         this.type=1;
     }
@@ -45,7 +46,7 @@ public class DFConflict {
     
     public void addConflictedLhs(String l){
         //Retournera une erreur si type != 1
-        lhs.add(l);
+        rhconfl.add(l);
         message=message+" and "+l;
     }
     
@@ -62,7 +63,7 @@ public class DFConflict {
     }
 
     void removeLh(String get) {
-        lhs.remove(get);
+        rhconfl.remove(get);
     }
     
 }

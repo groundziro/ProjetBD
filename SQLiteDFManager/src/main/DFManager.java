@@ -178,12 +178,12 @@ public class DFManager {
      * @param intru the DFConflict 
      */
     public void deleteOneConflictedData(DFConflict intru){
-        String[] cut=intru.getRh().split(",");
+        String[] cut=intru.getLhconfl().split(",");
         Object[] values=new Object[cut.length+1];
         for(int g=0;g<cut.length;g++){
             values[g]=cut[g];
         }
-        values[values.length-1]=intru.getLhs().get(0);
+        values[values.length-1]=intru.getRhconfl().get(0);
         String attributes="";
         String lhhs = intru.getDf().getLhs();
         String p[]= lhhs.split(" ");
@@ -192,7 +192,7 @@ public class DFManager {
         }
         attributes=attributes+intru.getDf().getRhs();
         deleteData(intru.getDf().getTableName(),attributes,values);
-        intru.removeLh(intru.getLhs().get(0));
+        intru.removeLh(intru.getRhconfl().get(0));
     }
     
     public DBManager getDB(){
@@ -214,12 +214,12 @@ public class DFManager {
                 for(int p=0;p<intru.getLhs().size();p++){
                     values[p]=intru.getLhs().get(p);
                 }*/
-                String[] cut=intru.getRh().split(",");
+                String[] cut=intru.getLhconfl().split(",");
                 Object[] values=new Object[cut.length+1];
                 for(int g=0;g<cut.length;g++){
                     values[g]=cut[g];
                 }
-                values[values.length-1]=intru.getLhs().get(0);
+                values[values.length-1]=intru.getRhconfl().get(0);
                 String attributes="";
                 String lhhs = intru.getDf().getLhs();
                 String p[]= lhhs.split(" ");
