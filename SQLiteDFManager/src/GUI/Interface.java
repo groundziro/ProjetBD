@@ -30,6 +30,7 @@ import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import main.DF;
+import main.DFConflict;
 import main.DFManager;
 
 /**
@@ -38,7 +39,7 @@ import main.DFManager;
  */
 public class Interface extends Application {
     private DFManager dfs = null;
-    private ArrayList<DF> deleted = new ArrayList<>();
+    private ArrayList<DFConflict> conflicts = null;
     @Override
     public void start(Stage primaryStage) {
         Button Browse = new Button("Browse");
@@ -61,17 +62,55 @@ public class Interface extends Application {
                 p.setPrefSize(300, 300);
                 try{
                     dfs = new DFManager(result.getAbsolutePath());
+                    conflicts = dfs.checkConflict();
                 }catch(SQLException e){
                     System.out.println(e.getMessage());
                 }
                 List<Button> btns = new ArrayList<>();
+                ArrayList<Button> conflictBtns = null;
                 try{
+                    conflictBtns = getConflicts(dfs);
                     for(String table : dfs.getTabNames()){
                         if(!"FuncDep".equals(table))
                         btns.add(new Button(table));
                     }
                 }catch(SQLException ex){
                     System.out.println(ex.getMessage());
+                }
+                if(!conflicts.isEmpty()){
+                    BorderPane conflict = new BorderPane();
+                    VBox v = new VBox();
+                    for(int i = 0; i<conflictBtns.size();i++){
+                        HBox h = new HBox();
+                        Text df = new Text(conflictBtns.get(i).getText());
+                        Button b = new Button(String.valueOf(i));
+                        if(conflicts.get(i).getType()>=2){
+                            b.setOnAction( conflicted -> {
+                                Alert alert = new Alert(AlertType.CONFIRMATION,"This DF needs to be deleted. Do you want it ?");
+                                alert.showAndWait().ifPresent(cnsmr->{
+                                    if(cnsmr==ButtonType.OK){
+                                        try{
+                                            delete(b.getText());
+                                        }catch(SQLException e){
+                                            System.out.println(e.getMessage());
+                                        }
+                                    }
+                                });
+                            });
+                        }
+                        else{
+                            b.setOnAction(conflicted->{
+                                Alert alert = new Alert(AlertType.INFORMATION,"There's a redundance within the values. You'll have to delete some. Make your choice.",ButtonType.OK);
+                                alert.showAndWait().ifPresent(cnsmr->{
+                                    
+                                });
+                            });
+                        }
+                        h.getChildren().addAll(df,b);
+                        v.getChildren().add(h);
+                    }                    
+                    conflict.setCenter(v);
+                    primaryStage.setScene(new Scene(conflict));
                 }
                 Alert continu = new Alert(AlertType.CONFIRMATION,"Continue?");
                 Button Add = new Button("Add DF");
@@ -89,6 +128,7 @@ public class Interface extends Application {
                 Scene Tables = new Scene(p);
                 Return.setOnAction(back->{
                     BorderPane newP = new BorderPane();
+                    BorderPane conflictPane = new BorderPane();
                     try{
                         newP.setCenter(current(dfs));
                     }catch(SQLException e){
@@ -99,16 +139,6 @@ public class Interface extends Application {
                     primaryStage.setScene(newTables);
                  });
                 Add.setOnAction(add->{
-                     List<Button> dfBtns = new ArrayList<>();
-                try{
-                    for(ArrayList<DF> table : DFManager.orderDFList(dfs.getDFs())){
-                        for(DF df: table){
-                            dfBtns.add(new Button(df.toString()));
-                        }
-                    }
-                }catch(SQLException ex){
-                    System.out.println(ex.getMessage());
-                }
                     BorderPane choice = new BorderPane();
                     VBox v = new VBox();
                     HBox h = new HBox();
@@ -148,16 +178,16 @@ public class Interface extends Application {
                     primaryStage.setScene(new Scene(choice));
                 });
                 Modify.setOnAction(mod->{
-                     List<Button> dfBtns = new ArrayList<>();
-                try{
-                    for(ArrayList<DF> table : DFManager.orderDFList(dfs.getDFs())){
-                        for(DF df: table){
-                            dfBtns.add(new Button(df.toString()));
+                    List<Button> dfBtns = new ArrayList<>();
+                    try{
+                        for(ArrayList<DF> table : DFManager.orderDFList(dfs.getDFs())){
+                            for(DF df: table){
+                                dfBtns.add(new Button(df.toString()));
+                            }
                         }
+                    }catch(SQLException ex){
+                        System.out.println(ex.getMessage());
                     }
-                }catch(SQLException ex){
-                    System.out.println(ex.getMessage());
-                }
                     BorderPane choice = new BorderPane();
                     VBox v = new VBox();
                     HBox h = new HBox();
@@ -168,11 +198,10 @@ public class Interface extends Application {
                     h.getChildren().addAll(lhs,rhs);
                     for(Button b : dfBtns){
                         b.setOnAction(mod1->{
-                            
-                                Alert alert = new Alert(AlertType.CONFIRMATION,"Would you like to modify "+b.getText()+"into "+lhs.getText()+"->"+rhs.getText());
+                                Alert alert = new Alert(AlertType.CONFIRMATION,"Would you like to modify "+b.getText()+"into "+lhs.getText()+"->"+rhs.getText(),ButtonType.APPLY,ButtonType.CANCEL);
                                 alert.showAndWait().ifPresent(cnsmr->{
                                     try{
-                                        if(dfs.getDB().getColNames(getDF(b.getText()).getTableName()).contains(lhs.getText())&&dfs.getDB().getColNames(getDF(b.getText()).getTableName()).contains(rhs.getText())){
+                                        if(cnsmr==ButtonType.APPLY&&dfs.getDB().getColNames(getDF(b.getText()).getTableName()).contains(lhs.getText())&&dfs.getDB().getColNames(getDF(b.getText()).getTableName()).contains(rhs.getText())){
                                             modify(b.getText(),lhs.getText(),rhs.getText());
                                                 continu.showAndWait().ifPresent(flux->{
                                                 if(flux!=ButtonType.OK)
@@ -266,6 +295,22 @@ public class Interface extends Application {
         txt.setText(str);
         return txt;
     }*/
+    private ArrayList<Button> getConflicts(DFManager df)throws SQLException{
+        ArrayList<Button> conflicts = new ArrayList<>();
+        for(DFConflict conflict : df.checkConflict()){
+            for(DF func : df.getDFs()){
+                if(conflict.getDf().equals(func)){
+                    Button b = new Button(func.toString());
+                    conflicts.add(b);
+                    break;
+                }
+            }
+        }
+        return conflicts;
+    }
+    private void updateConflicts()throws SQLException{
+        
+    }
     private Text current(DFManager df) throws SQLException{
         Text txt = new Text();
         String str="";
