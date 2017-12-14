@@ -5,19 +5,28 @@
  */
 package main;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author Alfatta
  */
 public class DF {
     String tableName;
-    String lhs;
+    String lhs;    
     String rhs;
+    int[] lhsids; //for unnamed 
+    int rhsid;    //for unnamed
 
     public DF(String tableName, String lhs, String rhs) {
         this.tableName = tableName;
         this.lhs = lhs;
         this.rhs = rhs;
+    }
+    
+    public void giveRef(int[] l, int r){
+        lhsids=l;
+        rhsid=r;
     }
 
     public String getTableName() {

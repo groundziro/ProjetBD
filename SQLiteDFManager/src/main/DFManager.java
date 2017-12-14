@@ -7,9 +7,12 @@ package main;
 
 //import static main.SQLiteConnector.createNewDB;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -17,10 +20,10 @@ import java.util.List;
  * @author Alfatta
  */
 public class DFManager {
-    DBManager dbc;
+    DBManager dbm;
 
     public DFManager(DBManager dbc) throws SQLException {
-        this.dbc = dbc;
+        this.dbm = dbc;
         checkFuncDep();
     }
    
@@ -49,25 +52,151 @@ public class DFManager {
         return result;
     }
     
+    /**
+     * Discover all the -DF related mistakes
+     * @return an ArrayList of DFConflict
+     * @throws SQLException
+     */
+    public ArrayList<DFConflict> checkConflict() throws SQLException{
+        ArrayList<DFConflict> conflicts = new ArrayList<>();
+        List<DF> dfs = getDFs();
+        List<String> cols;
+        ResultSet tableData;
+        int[] rhcol;
+        int lhcol;
+        boolean ok;
+        String line;
+        Map<String, String> map;
+        List<String> tabName = getTabNames();
+        for(DF curDF: dfs){
+            ok=false;
+            for (String name : tabName) {
+                if(name.equals(curDF.getTableName())){
+                    ok=true;
+                }
+            }
+            if(!ok){
+                conflicts.add(new DFConflict(curDF,3,"No such table: '"+curDF.getTableName()+"'"));
+            }
+            else{
+                tableData=getTableDatas(curDF.getTableName());
+                map = new HashMap<>();
+                cols = getColNames(curDF.getTableName()); //les colonnes de la table
+                String[] lh=decomposeLhs(curDF);   //les nom des attribus concernés
+                rhcol= new int[lh.length];   //garde les id des colonnes concernées par rhs
+                for(int i=0;i<rhcol.length;i++){
+                    rhcol[i]=-1;
+                }
+                lhcol=-1;
+                for(int i=0;i<lh.length;i++){
+                    for(int j=0;j<cols.size();j++){
+                        if(lh[i].equals(cols.get(j))){
+                            rhcol[i]=j;
+                        }
+                    }       
+                }
+                for(int i=0;i<cols.size();i++){
+                    if(cols.get(i).equals(curDF.getRhs()))
+                        lhcol=i;
+                }
+                if(lhcol==-1){                  //Check attribu lh dans la table
+                    conflicts.add(new DFConflict(curDF,2,"Attribute '"+curDF.getRhs()+"' not in table "+curDF.getTableName()));
+                    ok=false;
+                }
+                if(ok){
+                    for(int i=0;i<rhcol.length;i++){        
+                        if(rhcol[i]==-1){           //Check tout attribu rh dans la table
+                             conflicts.add(new DFConflict(curDF,2,"Attribute '"+lh[i]+"' not in table "+curDF.getTableName()));
+                             ok=false;
+                        } 
+                    }}
+                if(ok){
+                    curDF.giveRef(rhcol, lhcol);
+                    while(tableData.next()){
+                        line="";
+                        for(int k=0;k<rhcol.length;k++){
+                           line=line+String.valueOf(tableData.getObject(rhcol[k]+1))+",";
+                        }
+                        line=line.substring(0,line.length()-1);
+                        if(!map.containsKey(line)){
+                            map.put(line,String.valueOf(tableData.getObject(lhcol+1)));
+                        }
+                        else{
+                            if(! map.get(line).equals(String.valueOf(tableData.getObject(lhcol+1)))){
+                                if(conflicts.size() != 0 && conflicts.get(conflicts.size()-1).getDf().equals(curDF)){
+                                    conflicts.get(conflicts.size()-1).addConflictedLhs(String.valueOf(tableData.getObject(lhcol+1)));
+                                }
+                                else{  
+                                conflicts.add(new DFConflict(curDF,line,String.valueOf(tableData.getObject(lhcol+1)),map.get(line)));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return conflicts;
+    }
+    
+    public static String[] decomposeLhs(DF df){
+        return df.getLhs().split(" ");
+    }
+    
+    public List<String> getColNames(String table) throws SQLException{
+        return dbm.getColNames(table);
+    }
+            
     public List<String> getTabNames() throws SQLException{
-        return dbc.getTabNames();
+        return dbm.getTabNames();
     }    
     
+    public ResultSet getTableDatas(String table) throws SQLException{
+        return dbm.getTableDatas(table);
+    }
+    
     public List<DF> getDFs() throws SQLException{
-        return dbc.getDFs();
+        return dbm.getDFs();
     }
     
     public DFManager(String path) throws SQLException {
-        dbc = new DBManager(path);
+        dbm = new DBManager(path);
         checkFuncDep();
     }
 
     public final boolean checkFuncDep() throws SQLException{
-        dbc.createNewTable("FuncDep","tableName text","lhs text","rhs integer","PRIMARY KEY (tableName,lhs,rhs)");
-        return dbc.isEmpty("FuncDep"); 
+        dbm.createNewTable("FuncDep","tableName text","lhs text","rhs integer","PRIMARY KEY (tableName,lhs,rhs)");
+        return dbm.isEmpty("FuncDep"); 
     }
+    
+    public void deleteData(String table, String attributes, Object[] values){
+        dbm.deleteData(table, attributes, values);
+    }
+    
+    /**
+     * Delete ONE conflicted tuple with DF from the data base. 
+     * Note that the DF could still show conflict if more than 2 data where in conflict.
+     * @param intru the DFConflict 
+     */
+    public void deleteOneConflictedData(DFConflict intru){
+        String[] cut=intru.getRh().split(",");
+        Object[] values=new Object[cut.length+1];
+        for(int g=0;g<cut.length;g++){
+            values[g]=cut[g];
+        }
+        values[values.length-1]=intru.getLhs().get(0);
+        String attributes="";
+        String lhhs = intru.getDf().getLhs();
+        String p[]= lhhs.split(" ");
+        for(String pp : p){
+            attributes=attributes+pp+",";
+        }
+        attributes=attributes+intru.getDf().getRhs();
+        deleteData(intru.getDf().getTableName(),attributes,values);
+        intru.removeLh(intru.getLhs().get(0));
+    }
+    
     public DBManager getDB(){
-        return dbc;
+        return dbm;
     }
     
     /**
@@ -75,6 +204,35 @@ public class DFManager {
      */
     public static void main(String[] args) throws SQLException {
         DFManager dfm = new DFManager("test.db");
+        //dfm.dbc.printTable("bananes");
+        ArrayList<DFConflict> johlebanjo= dfm.checkConflict();
+        for(int i=0;i<johlebanjo.size();i++){
+            System.out.println(johlebanjo.get(i).message);
+            if(johlebanjo.get(i).type==1){
+                DFConflict intru=johlebanjo.get(i);
+                /*String[] values=new String[intru.getLhs().size()+1];
+                for(int p=0;p<intru.getLhs().size();p++){
+                    values[p]=intru.getLhs().get(p);
+                }*/
+                String[] cut=intru.getRh().split(",");
+                Object[] values=new Object[cut.length+1];
+                for(int g=0;g<cut.length;g++){
+                    values[g]=cut[g];
+                }
+                values[values.length-1]=intru.getLhs().get(0);
+                String attributes="";
+                String lhhs = intru.getDf().getLhs();
+                String p[]= lhhs.split(" ");
+                for(String pp : p){
+                    attributes=attributes+pp+",";
+                }
+                attributes=attributes+intru.getDf().getRhs();
+                dfm.deleteData(intru.getDf().getTableName(),attributes,values);
+                
+            }
+            System.out.println("");
+        }
+        /*
         List<DF> df = dfm.getDFs();
         
         System.out.println("\n*.BEFORE THE SORT.*\n");
@@ -94,7 +252,7 @@ public class DFManager {
                 System.out.println("     "+sorted.get(i).get(j));
             }
         }
-        
+        */
       /*
         System.out.println("ok");
         DBManager dbc= new DBManager("test.db");

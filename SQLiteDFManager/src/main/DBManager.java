@@ -123,6 +123,9 @@ public class DBManager {
      
     /**
      * Delete entries from the DB. Only accept equality conditions
+     * ex use:
+     *   deleteData("bananes","avweight,colour,tasteval",8.6,"blue",5);
+     *   deleteData("bananes","tasteval",2);
      * @param table
      * @param attributes
      * @param values
@@ -130,17 +133,21 @@ public class DBManager {
     public void deleteData(String table, String attributes, Object... values){
         String sqlStm="DELETE FROM "+table+" WHERE ("+attributes+")= (";
         for(int i=0;i<values.length;i++){
-            if(values[i].getClass()==String.class)
+            if(values[i].getClass()==String.class){
                 sqlStm=sqlStm+"'"+(String)values[i]+"',";
-            else
+            }
+            else{
                 sqlStm=sqlStm+values[i].toString()+",";
+            }
         }
             //removing the last ","
         sqlStm=sqlStm.substring(0,sqlStm.length()-1);
         sqlStm=sqlStm+");";
         System.out.println(sqlStm);
         executeStatement(sqlStm);
-    }/**
+    }
+    
+    /**
      * Delete DFs.
      * @param attributes
      * @param values 
@@ -372,5 +379,7 @@ public class DBManager {
         }
     }
     */
+
+   
     
 }

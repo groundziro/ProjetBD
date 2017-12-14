@@ -3,10 +3,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Alfatta/Documents/GitHub/ProjetBD/SQLiteDFManager/src/main/DFManager.java</file>
-            <file>file:/C:/Users/Alfatta/Documents/GitHub/ProjetBD/SQLiteDFManager/src/main/DF.java</file>
-            <file>file:/C:/Users/Alfatta/Documents/GitHub/ProjetBD/SQLiteDFManager/src/main/DBManager.java</file>
-            <file>file:/C:/Users/Alfatta/Documents/GitHub/ProjetBD/SQLiteDFManager/src/GUI/Interface.java</file>
+            <file>file:/C:/Users/Alfa/Documents/GitHub/ProjetBD/SQLiteDFManager/src/main/DF.java</file>
+            <file>file:/C:/Users/Alfa/Documents/GitHub/ProjetBD/SQLiteDFManager/src/main/DFConflict.java</file>
+            <file>file:/C:/Users/Alfa/Documents/GitHub/ProjetBD/SQLiteDFManager/src/GUI/Interface.java</file>
+            <file>file:/C:/Users/Alfa/Documents/GitHub/ProjetBD/SQLiteDFManager/src/main/DFManager.java</file>
+            <file>file:/C:/Users/Alfa/Documents/GitHub/ProjetBD/SQLiteDFManager/src/main/DBManager.java</file>
         </group>
     </open-files>
 </project-private>
