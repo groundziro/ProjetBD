@@ -120,7 +120,9 @@ public class DBManager {
             System.out.println(e.getMessage());
         }
     }
-     
+    public void insertDF(String attributes,Object... values){
+        insertData("FuncDep",attributes,values);
+    }
     /**
      * Delete entries from the DB. Only accept equality conditions
      * @param table

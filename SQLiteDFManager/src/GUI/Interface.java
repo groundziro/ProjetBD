@@ -123,17 +123,21 @@ public class Interface extends Application {
                     Button confirm = new Button("Confirm");
                     confirm.setOnAction(confirmed->{
                             DF df = new DF(table.getText(),lhs.getText(),rhs.getText());
-                            Alert alert = new Alert(AlertType.CONFIRMATION,"Do you want to add to "+table.getText()+": "+df.toString());
+                            Alert alert = new Alert(AlertType.CONFIRMATION,"Do you want to add to "+df.getTableName()+": "+df.toString());
                             alert.showAndWait().ifPresent(response->{
                                 if(response == ButtonType.OK){
                                     try{
+                                        if(!dfs.getTabNames().contains(df.getTableName())){
+                                            throw new SQLException("This table doesn't exist");
+                                        }
                                         add(df);
                                         continu.showAndWait().ifPresent(flux->{
                                             if(flux!=ButtonType.OK)
                                                 Return.fire();
                                         });                                        
                                     } catch (SQLException ex) {
-                                        System.out.println(ex.getMessage());
+                                        Alert warning = new Alert(AlertType.WARNING,ex.getMessage());
+                                        warning.showAndWait();
                                     }
                                     
                                 }
@@ -275,6 +279,17 @@ public class Interface extends Application {
         txt.setText(str);
         return txt;
     }
+    private ArrayList<String> getLhs(String lhs){
+        ArrayList<String> res = new ArrayList<>();
+        String copy = lhs;
+        res.add(copy.substring(0, copy.indexOf(' ')));
+        while(!copy.equals(copy+"")&&!copy.equals(copy+" ")){
+            System.out.println(copy);
+            copy = copy.substring(copy.indexOf(' '));
+            res.add(copy.substring(0,copy.indexOf(' ')));
+        }
+        return res;
+    }
     private DF getDF(String df)throws SQLException{
         for(DF func : dfs.getDFs()){
             if(func.toString().equals(df))
@@ -283,14 +298,20 @@ public class Interface extends Application {
         return null;
     }
     private void add(DF df)throws SQLException{
-        if(!dfs.getTabNames().contains(df.getTableName()))
+        if(!dfs.getTabNames().contains(df.getTableName())){
             return;
-        if(dfs.getDB().getColNames(df.getTableName()).contains(df.getLhs())&&dfs.getDB().getColNames(df.getTableName()).contains(df.getRhs())){
-            dfs.getDB().insertData("FuncDep", "table1,lhs,rhs", df.getTableName(),df.getLhs(),df.getRhs());
+        }
+        if(dfs.getDB().getColNames(df.getTableName()).contains(df.getRhs())){
+            for(String lhs: getLhs(df.getLhs())){
+                if(!dfs.getDB().getColNames(df.getTableName()).contains(lhs)){
+                    System.out.println("SHEISSE");
+                    return;
+                }
+            }
+            dfs.getDB().insertDF("table1,lhs,rhs", df.getTableName(),df.getLhs(),df.getRhs());
         }
     }
     private void modify(String df,String lhs,String rhs)throws SQLException{
-        System.out.println(getDF(df).getTableName());
         dfs.getDB().insertData("FuncDep", "table1,lhs,rhs", getDF(df).getTableName(),lhs,rhs);
         delete(df);
     }
