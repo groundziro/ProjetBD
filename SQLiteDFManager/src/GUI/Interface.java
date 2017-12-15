@@ -39,7 +39,6 @@ import main.DFManager;
  */
 public class Interface extends Application {
     private DFManager dfs = null;
-    private ArrayList<DFConflict> conflicts = null;
     @Override
     public void start(Stage primaryStage) {
         Button Browse = new Button("Browse");
@@ -62,14 +61,13 @@ public class Interface extends Application {
                 p.setPrefSize(300, 300);
                 try{
                     dfs = new DFManager(result.getAbsolutePath());
-                    conflicts = dfs.checkConflict();
                 }catch(SQLException e){
                     System.out.println(e.getMessage());
                 }
                 List<Button> btns = new ArrayList<>();
                 ArrayList<Button> conflictBtns = null;
                 try{
-                    conflictBtns = getConflicts(dfs);
+                    conflictBtns = getConflicts();
                     for(String table : dfs.getTabNames()){
                         if(!"FuncDep".equals(table))
                         btns.add(new Button(table));
@@ -77,40 +75,48 @@ public class Interface extends Application {
                 }catch(SQLException ex){
                     System.out.println(ex.getMessage());
                 }
-                if(!conflicts.isEmpty()){
-                    BorderPane conflict = new BorderPane();
-                    VBox v = new VBox();
-                    for(int i = 0; i<conflictBtns.size();i++){
-                        HBox h = new HBox();
-                        Text df = new Text(conflictBtns.get(i).getText());
-                        Button b = new Button(String.valueOf(i));
-                        if(conflicts.get(i).getType()>=2){
-                            b.setOnAction( conflicted -> {
-                                Alert alert = new Alert(AlertType.CONFIRMATION,"This DF needs to be deleted. Do you want it ?");
-                                alert.showAndWait().ifPresent(cnsmr->{
-                                    if(cnsmr==ButtonType.OK){
-                                        try{
-                                            delete(b.getText());
-                                        }catch(SQLException e){
-                                            System.out.println(e.getMessage());
+                try{
+                    if(!dfs.checkConflict().isEmpty()){
+                        BorderPane conflict = new BorderPane();
+                        VBox v = new VBox();
+                        for(int i = 0; i<conflictBtns.size();i++){
+                            HBox h = new HBox();
+                            Text df = new Text(conflictBtns.get(i).getText());
+                            Button b = new Button(String.valueOf(i));
+                            if(dfs.checkConflict().get(i).getType()>=2){
+                                b.setOnAction( conflicted -> {
+                                    Alert alert = new Alert(AlertType.CONFIRMATION,"This DF needs to be deleted. Do you want it ?");
+                                    alert.showAndWait().ifPresent(cnsmr->{
+                                        if(cnsmr==ButtonType.OK){
+                                            try{
+                                                delete(b.getText());
+                                                b.setVisible(false);
+                                            }catch(SQLException e){
+                                                System.out.println(e.getMessage());
+                                            }
                                         }
-                                    }
+                                    });
                                 });
-                            });
-                        }
-                        else{
-                            b.setOnAction(conflicted->{
-                                Alert alert = new Alert(AlertType.INFORMATION,"There's a redundance within the values. You'll have to delete some. Make your choice.",ButtonType.OK);
-                                alert.showAndWait().ifPresent(cnsmr->{
+                            }
+                            else{
+                                b.setOnAction(conflicted->{
+                                    Alert alert = new Alert(AlertType.INFORMATION,"There's a redundance within the values. You'll have to delete some. Make your choice.",ButtonType.OK);
+                                    alert.showAndWait().ifPresent(cnsmr->{
                                         
+                                    });
                                 });
-                            });
-                        }
-                        h.getChildren().addAll(df,b);
-                        v.getChildren().add(h);
-                    }                    
-                    conflict.setCenter(v);
-                    primaryStage.setScene(new Scene(conflict));
+                            }
+                            h.getChildren().addAll(df,b);
+                            v.getChildren().add(h);
+                        }                    
+                        conflict.setCenter(v);
+                        primaryStage.setScene(new Scene(conflict));
+                        primaryStage.showAndWait();
+                        if(dfs.checkConflict().isEmpty())
+                            primaryStage.show();
+                    }
+                }catch(SQLException ex){
+                    System.out.println();
                 }
                 Alert continu = new Alert(AlertType.CONFIRMATION,"Continue?");
                 Button Add = new Button("Add DF");
@@ -295,22 +301,16 @@ public class Interface extends Application {
         txt.setText(str);
         return txt;
     }*/
-    private ArrayList<Button> getConflicts(DFManager df)throws SQLException{
-        ArrayList<Button> conflicts = new ArrayList<>();
-        for(DFConflict conflict : df.checkConflict()){
-            for(DF func : df.getDFs()){
-                if(conflict.getDf().equals(func)){
-                    System.out.println(conflict.getDf().toString());
-                    Button b = new Button(func.toString());
-                    conflicts.add(b);
-                    break;
-                }
-            }
+    private ArrayList<Button> getConflicts()throws SQLException{
+        ArrayList<Button> conflictsBtns = new ArrayList<>();
+        for(DFConflict conflict : dfs.checkConflict()){
+            Button b = new Button(conflict.getDf().toString());
+            conflictsBtns.add(b);
         }
-        return conflicts;
+        return conflictsBtns;
     }
-    private void updateConflicts()throws SQLException{
-        
+    private ArrayList<Button> updateConflicts()throws SQLException{
+        return getConflicts();
     }
     private Text current(DFManager df) throws SQLException{
         Text txt = new Text();
