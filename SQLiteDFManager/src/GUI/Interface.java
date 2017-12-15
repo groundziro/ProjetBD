@@ -102,7 +102,7 @@ public class Interface extends Application {
                             b.setOnAction(conflicted->{
                                 Alert alert = new Alert(AlertType.INFORMATION,"There's a redundance within the values. You'll have to delete some. Make your choice.",ButtonType.OK);
                                 alert.showAndWait().ifPresent(cnsmr->{
-                                    
+                                        
                                 });
                             });
                         }
@@ -300,6 +300,7 @@ public class Interface extends Application {
         for(DFConflict conflict : df.checkConflict()){
             for(DF func : df.getDFs()){
                 if(conflict.getDf().equals(func)){
+                    System.out.println(conflict.getDf().toString());
                     Button b = new Button(func.toString());
                     conflicts.add(b);
                     break;

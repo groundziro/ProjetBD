@@ -225,15 +225,16 @@ public class DFManager {
     public static void main(String[] args) throws SQLException {
         DFManager dfm = new DFManager("test.db");
         //dfm.dbc.printTable("bananes");
+        System.out.println("");
         ArrayList<DFConflict> johlebanjo= dfm.checkConflict();
         for(int i=0;i<johlebanjo.size();i++){
-            System.out.println(johlebanjo.get(i).message);
+            System.out.println(johlebanjo.get(i).message);/*
             if(johlebanjo.get(i).type==1){
                 DFConflict intru=johlebanjo.get(i);
-                /*String[] values=new String[intru.getLhs().size()+1];
+                String[] values=new String[intru.getLhs().size()+1];
                 for(int p=0;p<intru.getLhs().size();p++){
                     values[p]=intru.getLhs().get(p);
-                }*/
+                }
                 String[] cut=intru.getLhconfl().split(",");
                 Object[] values=new Object[cut.length+1];
                 for(int g=0;g<cut.length;g++){
@@ -249,7 +250,7 @@ public class DFManager {
                 attributes=attributes+intru.getDf().getRhs();
                 dfm.deleteData(intru.getDf().getTableName(),attributes,values);
                 
-            }
+            }*/
             System.out.println("");
         }
         /*
