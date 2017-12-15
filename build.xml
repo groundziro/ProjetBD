@@ -1,0 +1,32 @@
+<project name="SQLiteDFManager" default="run">
+    <target name="build">
+	<mkdir dir="build"/>
+	<mkdir dir="build/classes"/>
+        <javac srcdir="SQLiteDFManager/src/" destdir="build/classes">
+	 <classpath>
+		<pathelement path="lib/sqlite-jdbc-3.20.0.jar"/>
+	</classpath>
+        </javac>    
+    </target>
+    <target name="clean">
+        <delete dir="build"/>
+    </target>
+<target name="jar" depends="build">
+	<mkdir dir="build/jar"/>
+	<jar destfile="build/jar/SQLiteDFManager.jar" basedir="build/classes">
+	  <zipgroupfileset dir="lib" includes="sqlite-jdbc-3.20.0.jar"/>
+	  <manifest>
+		<attribute name="Interface"  value="main"/>
+		<attribute name="Main-Class" value="GUI.Interface"/>
+	  </manifest>
+	</jar>
+</target>
+    <target name="run" depends="jar">
+        <java jar="build/jar/SQLiteDFManager.jar" fork="true">
+		<classpath>
+			<pathelement path="./lib/sqlite-jdbc-3.20.0.jar"/>
+			<pathelement path="build/jar/SQLiteDFManager.jar"/>
+		</classpath>
+        </java>
+    </target>
+</project>
