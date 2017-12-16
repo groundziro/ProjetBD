@@ -7,9 +7,12 @@ package GUI;
  */
 
 import java.io.File;
+import java.sql.Array;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -77,20 +80,23 @@ public class Interface extends Application {
                 }
                 try{
                     if(!dfs.checkConflict().isEmpty()){
+                        Semaphore sem = new Semaphore(1);
+                        sem.acquire();
                         BorderPane conflict = new BorderPane();
                         VBox v = new VBox();
-                        for(int i = 0; i<conflictBtns.size();i++){
-                            HBox h = new HBox();
-                            Text df = new Text(conflictBtns.get(i).getText());
-                            Button b = new Button(String.valueOf(i));
-                            if(dfs.checkConflict().get(i).getType()>=2){
-                                b.setOnAction( conflicted -> {
+                        for(Button btn : conflictBtns){
+                            if(getType(btn.getText())>=2){
+                                btn.setOnAction( conflicted -> {
                                     Alert alert = new Alert(AlertType.CONFIRMATION,"This DF needs to be deleted. Do you want it ?");
                                     alert.showAndWait().ifPresent(cnsmr->{
                                         if(cnsmr==ButtonType.OK){
                                             try{
-                                                delete(b.getText());
-                                                b.setVisible(false);
+                                                delete(btn.getText());
+                                                btn.setVisible(false);
+                                                if(dfs.checkConflict().isEmpty())
+                                                    synchronized (primaryStage){
+                                                        primaryStage.notify();
+                                                    }
                                             }catch(SQLException e){
                                                 System.out.println(e.getMessage());
                                             }
@@ -99,24 +105,46 @@ public class Interface extends Application {
                                 });
                             }
                             else{
-                                b.setOnAction(conflicted->{
+                                btn.setOnAction(conflicted->{
                                     Alert alert = new Alert(AlertType.INFORMATION,"There's a redundance within the values. You'll have to delete some. Make your choice.",ButtonType.OK);
                                     alert.showAndWait().ifPresent(cnsmr->{
-                                        
+                                        try {
+                                            if(cnsmr==ButtonType.OK){
+                                                BorderPane tuples = new BorderPane();
+                                                VBox v1 = new VBox();
+                                                DFConflict df = getConflict(btn.getText());
+                                                ResultSet rs = dfs.getTableDatas(df.getDf().getTableName());
+                                                while(!rs.isLast()){
+                                                    
+                                                    if(rs.getString(df.getDf().getRhs()).equals(df.getLhconfl())){
+                                                        Button delete = new Button(rs.getString(df.getDf().getRhs()));
+                                                        delete.setOnAction(deleted->{
+                                                            //dfs.deleteData(df.getDf().getTableName(),df.getDf().getRhs(),rs.getString(df.getDf().getRhs()));
+                                                        });
+                                                        v1.getChildren().add(delete);
+                                                    }
+                                                    rs.next();
+                                                }
+                                                tuples.setCenter(v1);
+                                                primaryStage.setScene(new Scene(tuples));
+                                            }
+                                        } catch (SQLException ex) {
+                                            Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
+                                        }
                                     });
                                 });
                             }
-                            h.getChildren().addAll(df,b);
-                            v.getChildren().add(h);
+                            v.getChildren().add(btn);
                         }                    
                         conflict.setCenter(v);
                         primaryStage.setScene(new Scene(conflict));
-                        primaryStage.showAndWait();
-                        if(dfs.checkConflict().isEmpty())
-                            primaryStage.show();
+                        primaryStage.setTitle("Conflicts");
+                        primaryStage.wait();
                     }
                 }catch(SQLException ex){
                     System.out.println();
+                }catch (InterruptedException ex) {
+                    Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 Alert continu = new Alert(AlertType.CONFIRMATION,"Continue?");
                 Button Add = new Button("Add DF");
@@ -311,6 +339,20 @@ public class Interface extends Application {
     }
     private ArrayList<Button> updateConflicts()throws SQLException{
         return getConflicts();
+    }
+    private int getType(String df) throws SQLException{
+        for(DFConflict conflict:dfs.checkConflict()){
+            if(conflict.getDf().toString().equals(df))
+                return conflict.getType();
+        }
+        return 0;
+    }
+    private DFConflict getConflict(String df) throws SQLException{
+        for(DFConflict conflict:dfs.checkConflict()){
+            if(conflict.getDf().toString().equals(df))
+                return conflict;
+        }
+        return null;
     }
     private Text current(DFManager df) throws SQLException{
         Text txt = new Text();
