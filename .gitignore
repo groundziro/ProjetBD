@@ -1,19 +1,15 @@
 
 *.properties
-OnNetbeans/ProjetBD/nbproject/build-impl.xml
-OnNetbeans/ProjetBD/nbproject/private/private.xml
 /Other/OnNetbeans/ProjetBD/build/
 /Other/OnNetbeans/ProjetBD/nbproject/private/
-/SQLiteDFManager/build/
+SQLiteDFManager/build/
 SQLiteDFManager/nbproject/private/retriever/catalog.xml
-SQLiteDFManager/nbproject/private/private.xml
 *.xml
-*.xml
-SQLiteDFManager/nbproject/private/private.xml
 SQLiteDFManager/nbproject/private/private.xml
 /SQLiteDFManager/dist/
 *.*
-/SQLiteDFManager/nbproject/project.properties
+SQLiteDFManager/nbproject/project.properties
 SQLiteDFManager/test.db
 !/SQLiteDFManager/src/main/DFConflict.java
-/SQLiteDFManager/nbproject/
+SQLiteDFManager/nbproject/
+SQLiteDFManager/nbproject/private/private.xml
