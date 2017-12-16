@@ -11,5 +11,5 @@ SQLiteDFManager/nbproject/private/private.xml
 SQLiteDFManager/nbproject/project.properties
 SQLiteDFManager/test.db
 !/SQLiteDFManager/src/main/DFConflict.java
-SQLiteDFManager/nbproject/
-SQLiteDFManager/nbproject/private/private.xml
+
+SQLiteDFManager\nbproject\private\private.xml
