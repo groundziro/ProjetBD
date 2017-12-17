@@ -270,8 +270,10 @@ public class Interface extends Application {
         for(Button btn : conflictBtns){
         if(getType(btn.getText())>=2){
             btn.setOnAction(conflicted -> {
-                Alert alert = new Alert(AlertType.CONFIRMATION,"This DF needs to be deleted. Do you want it ?");
-                alert.showAndWait().ifPresent(cnsmr->{
+                Alert alert = null;
+                try {
+                    alert = new Alert(AlertType.CONFIRMATION,"This DF needs to be deleted, because : "+getConflict(btn.getText()).toString()+". Do you want it ?");
+                    alert.showAndWait().ifPresent(cnsmr->{
                     if(cnsmr==ButtonType.OK){
                         try{
                             delete(btn.getText());
@@ -285,6 +287,10 @@ public class Interface extends Application {
                         }
                     }
                 });
+                } catch (SQLException ex) {
+                    Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
             });
         }else{
             btn.setOnAction(conflicted->{
