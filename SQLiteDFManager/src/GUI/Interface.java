@@ -309,11 +309,11 @@ public class Interface extends Application {
                                 Button b = new Button(String.valueOf(i));
                                 b.setId(String.valueOf(i));
                                 b.setOnAction(deleted->{
-                                    Alert confirm = new Alert(AlertType.CONFIRMATION,"Do you want to delete this tuple?");
+                                    Alert confirm = new Alert(AlertType.CONFIRMATION,"Do you want to delete this tuple:"+df.getLhconfl()+" "+rh+"?");
                                     boolean confirmed = false;
                                     confirm.showAndWait().ifPresent(delete->{
                                         if(delete==ButtonType.OK && df.getRhconfl().size()>1){
-                                            dfs.deleteOneConflictedData(df, Integer.valueOf(b.getId())%df.getRhconfl().size());
+                                            dfs.deleteOneConflictedData(df, getId(rh,df));
                                             h.setVisible(false);                                                            
                                         try {
                                             if(df.getRhconfl().size()==1){
@@ -390,6 +390,17 @@ public class Interface extends Application {
         }
         txt.setText(str);
         return txt;
+    }
+    private int getId(String rhs,DFConflict df){
+        int i = 0;
+        for(String rh : df.getRhconfl()){
+            if(!rhs.equals(rh))
+                i++;
+            else{
+                break;
+            }
+        }
+        return i;
     }
     private ArrayList<String> getLhs(String lhs){
         ArrayList<String> res = new ArrayList<>();
