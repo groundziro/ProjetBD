@@ -65,21 +65,9 @@ public class Interface extends Application {
             }catch(SQLException e){
                 System.out.println(e.getMessage());
             }
-            List<Button> btns = new ArrayList<>();
-            ArrayList<Button> conflictBtns = null;
-            try{
-                conflictBtns = getConflicts();
-                for(String table : dfs.getTabNames()){
-                    if(!"FuncDep".equals(table))
-                        btns.add(new Button(table));
-                }
-            }catch(SQLException ex){
-                System.out.println(ex.getMessage());
-            }
             try {
                 if(!dfs.checkConflict().isEmpty()){
-                    Stage conflictStage = new Stage();
-                    conflicts(primaryStage,conflictStage,conflictBtns);
+                    conflicts(primaryStage);
                 }else{
                     init(primaryStage,p,scene);
                 }
@@ -121,9 +109,11 @@ public class Interface extends Application {
             Scene Tables = new Scene(p);
             Return.setOnAction(back->{
                 BorderPane newP = new BorderPane();
-                BorderPane conflictPane = new BorderPane();
                 try{
                     newP.setCenter(current(dfs));
+                    if(!dfs.checkConflict().isEmpty()){
+                        conflicts(primaryStage);
+                    }
                 }catch(SQLException e){
                     System.out.println(e.getMessage());
                 }
@@ -162,7 +152,6 @@ public class Interface extends Application {
                                 Alert warning = new Alert(AlertType.WARNING,ex.getMessage());
                                 warning.showAndWait();
                             }
-                            
                         }
                     });
                 });
@@ -271,16 +260,17 @@ public class Interface extends Application {
                 primaryStage.setScene(new Scene(choice));
             });
             primaryStage.setScene(Tables);
-            }
+    }
     /**
      *
      * @param primaryStage
-     * @param conflictStage
      * @param conflictBtns
      * @throws SQLException
      */
-    protected void conflicts(Stage primaryStage,Stage conflictStage,ArrayList<Button> conflictBtns) throws SQLException{
+    protected void conflicts(Stage primaryStage) throws SQLException{
         primaryStage.hide();
+        ArrayList<Button> conflictBtns = getConflicts();
+        Stage conflictStage = new Stage();
         BorderPane conflict = new BorderPane();
         VBox v = new VBox();
         for(Button btn : conflictBtns){
@@ -373,9 +363,7 @@ public class Interface extends Application {
         }
         return conflictsBtns;
     }
-    protected ArrayList<Button> updateConflicts()throws SQLException{
-        return getConflicts();
-    }
+    
     protected int getType(String df) throws SQLException{
         for(DFConflict conflict:dfs.checkConflict()){
             if(conflict.getDf().toString().equals(df))
