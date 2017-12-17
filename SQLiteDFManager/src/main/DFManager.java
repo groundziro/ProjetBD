@@ -33,6 +33,25 @@ public class DFManager {
      * @param lis
      * @return
      */
+    
+    public ArrayList<Key> getKeys(String table) throws SQLException{
+        List<String> atribNames = dbm.getColNames(table);
+        List<DF> dfs = getDFs();
+        Key curKey=new Key();
+        boolean[] tt=new boolean[atribNames.size()];  //Is is possible to reach attribute i with a DF?
+        for(int i=0;i<tt.length;i++){
+            tt[i]=false;
+        }
+        for(int i=0;i<atribNames.size();i++){
+            for(DF curDf:dfs){
+                if(curDf.getRhs().equals(atribNames.get(i))){
+                    tt[i]=true;
+                    break;
+                }
+            }
+        }
+    }
+    
     public static ArrayList<ArrayList<DF>> orderDFList(List<DF> lis){
         int tabl;
         ArrayList<ArrayList<DF>> result= new ArrayList<>();
