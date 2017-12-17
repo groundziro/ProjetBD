@@ -315,19 +315,16 @@ public class Interface extends Application {
                             for(String rh:df.getRhconfl()){
                                 HBox h = new HBox();
                                 Text t = new Text();
-                                t.setText(df.getLhconfl()+" "+rh+"type: "+String.valueOf(df.getType()));                                                    
+                                t.setText(df.getLhconfl()+" "+rh);                                                    
                                 Button b = new Button(String.valueOf(i));
                                 b.setId(String.valueOf(i));
                                 b.setOnAction(deleted->{
                                     Alert confirm = new Alert(AlertType.CONFIRMATION,"Do you want to delete this tuple?");
+                                    boolean confirmed = false;
                                     confirm.showAndWait().ifPresent(delete->{
-                                        try {
-                                            dfs.deleteOneConflictedData(df, Integer.valueOf(b.getId())%dfs.checkConflict().size());
-                                        } catch (SQLException ex) {
-                                            System.out.println(ex.getMessage());
-                                        }
-                                        h.setVisible(false);
-                                                            
+                                        if(delete==ButtonType.OK){
+                                            dfs.deleteOneConflictedData(df, Integer.valueOf(b.getId())%df.getRhconfl().size());
+                                            h.setVisible(false);                                                            
                                         try {
                                             boolean visible = false;
                                             for(Node n: v1.getChildren()){
@@ -344,6 +341,7 @@ public class Interface extends Application {
                                             }
                                         } catch (SQLException ex) {
                                             Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
+                                        }
                                         }
                                     });
                                 });
