@@ -322,15 +322,11 @@ public class Interface extends Application {
                                     Alert confirm = new Alert(AlertType.CONFIRMATION,"Do you want to delete this tuple?");
                                     boolean confirmed = false;
                                     confirm.showAndWait().ifPresent(delete->{
-                                        if(delete==ButtonType.OK){
+                                        if(delete==ButtonType.OK && df.getRhconfl().size()>1){
                                             dfs.deleteOneConflictedData(df, Integer.valueOf(b.getId())%df.getRhconfl().size());
                                             h.setVisible(false);                                                            
                                         try {
-                                            boolean visible = false;
-                                            for(Node n: v1.getChildren()){
-                                                visible|=n.isVisible();
-                                            }
-                                            if(!visible){
+                                            if(df.getRhconfl().size()==1){
                                                 BorderPane newConflict = new BorderPane();
                                                 newConflict.setCenter(v);
                                                 conflictStage.setScene(new Scene(newConflict));
