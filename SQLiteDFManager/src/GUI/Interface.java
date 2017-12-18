@@ -395,7 +395,7 @@ public class Interface extends Application {
         ArrayList<ArrayList<DF>> array = DFManager.orderDFList(df.getDFs());
         for(ArrayList<DF> table : array){
             str+= table.get(0).getTableName()+":\n";
-            str+= df.getKeys(table.get(0).getTableName());
+            str+= df.getKeys(table.get(0).getTableName()).get(0);
             for(DF func : table){
                     str+="\t"+func.toString()+"\n";
             }

@@ -25,4 +25,13 @@ public class Key {
     public void addAttributes(String newAtr){
         attributes.add(newAtr);
     }
+    @Override
+    public String toString(){
+        String str= "[";
+        for(String s : attributes){
+            str+=s+" ";
+        }
+        str+="]";
+        return str;
+    }
 }
