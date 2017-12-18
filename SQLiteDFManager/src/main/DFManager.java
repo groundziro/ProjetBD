@@ -79,6 +79,7 @@ public class DFManager {
                 newAlrInKey.add(rem);
                 boolean newz;
                 newAlrHenced=findConsc(newAlrInKey,attributes,dfs);
+                //THIS PART SHOULD ACTUALLY GO TRROUGH ONCE SINCE findConsc ALREADY RETURN THE CONSC OF THE CONSC
                 editedNewAlrHenced=findConsc(newAlrHenced,attributes,dfs);
                 do{
                     newz=false;
@@ -92,7 +93,7 @@ public class DFManager {
                     editedNewAlrHenced=findConsc(newAlrHenced,attributes,dfs);
                 //}while(! newAlrHenced.containsAll(editedNewAlrHenced)); 
                 }while(newz);     //while we got more henced with the new henced
-                
+                //END OF 'THIS PART'
                 subbag=recursGetKeys(bag,attributes,newAlrInKey,newAlrHenced, dfs);
                 for(Key k:subbag){
                     if(! bag.contains(k))
@@ -114,21 +115,27 @@ public class DFManager {
         String[] cut;
         boolean good;
         ArrayList<String> consc=new ArrayList<>();
-        for(DF df:dfs){
-            if(! consc.contains(df.getRhs())){
-                good=true;
-                cut=df.getLhs().split(" ");
-                for(String part:cut){
-                    if(! whatWeGot.contains(part)){
-                        good=false;
-                        break;
+        boolean added=false;
+        do{
+            added=false;
+            for(DF df:dfs){
+                if(! consc.contains(df.getRhs())){
+                    good=true;
+                    cut=df.getLhs().split(" ");
+                    for(String part:cut){
+                        if(! whatWeGot.contains(part)){
+                            good=false;
+                            break;
+                        }
+                    }
+                    if(good){        
+                        consc.add(df.getRhs());
+                        whatWeGot.add(df.getRhs());
+                        added=true;
                     }
                 }
-                if(good){        
-                    consc.add(df.getRhs());
-                }
             }
-        }
+        }while(added);
         return consc;
     }
     
