@@ -475,13 +475,13 @@ public class Interface extends Application {
         dfs.getDB().deleteDF("lhs,rhs", df.substring(0, df.indexOf(" -")),df.substring(df.indexOf(">")+2));
     }
     private void check3NF(String table){
-        if(dfs.check3NF(table)){
+        /*if(dfs.check3NF(table)){
             Alert alert = new Alert(AlertType.INFORMATION,"This table is in 3NF");
             alert.showAndWait();
         }
         else{
             dfs.decompose(table);
-        }
+        }*/
         
     } 
     private boolean checkBCNF(String table){
