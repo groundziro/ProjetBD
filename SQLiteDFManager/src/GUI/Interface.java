@@ -30,6 +30,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import main.DF;
 import main.DFConflict;
 import main.DFManager;
+import main.Key;
 
 /**
  *
@@ -395,7 +396,11 @@ public class Interface extends Application {
         ArrayList<ArrayList<DF>> array = DFManager.orderDFList(df.getDFs());
         for(ArrayList<DF> table : array){
             str+= table.get(0).getTableName()+":\n";
-            str+= df.getKeys(table.get(0).getTableName()).get(0);
+            str+="Keys :\n";
+            for(Key k : df.getKeys(table.get(0).getTableName())){
+                str+="\t"+k.toString()+"\n";
+            }
+            str+="DFs :\n";
             for(DF func : table){
                     str+="\t"+func.toString()+"\n";
             }
