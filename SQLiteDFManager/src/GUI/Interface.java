@@ -262,7 +262,11 @@ public class Interface extends Application {
                             Alert alert = new Alert(AlertType.CONFIRMATION,"Do you wanna check if "+b.getText()+" is BCNF?");
                             alert.showAndWait().ifPresent(cnsmr->{
                                 if(cnsmr == ButtonType.OK)
-                                   checkBCNF(b.getText());
+                                   try {
+                                       checkBCNF(b.getText());
+                                } catch (SQLException ex) {
+                                    Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
+                                }
                             });
                         });
                         NF.setOnAction(nf->{
@@ -420,6 +424,7 @@ public class Interface extends Application {
             for(DF func : table){
                     str+="\t"+func.toString()+"\n";
             }
+            str+="-----------------------------\n";
         }
         txt.setText(str);
         return txt;
@@ -484,9 +489,8 @@ public class Interface extends Application {
         }*/
         
     } 
-    private boolean checkBCNF(String table){
-        //return DF.checkBCNF(table);
-        return true;
+    private boolean checkBCNF(String table) throws SQLException{
+        return dfs.isBCNF(table);
     }
     
     /**

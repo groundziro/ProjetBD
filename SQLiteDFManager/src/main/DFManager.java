@@ -103,7 +103,19 @@ public class DFManager {
             return bag;
         }
     }
-    
+    public boolean isBCNF(String table) throws SQLException{
+        List<DF> dfs = getDFs();
+        boolean bcnf = true;
+        for(DF df : dfs){
+            List<DF> func = new ArrayList<>();
+            func.add(df);
+            ArrayList<String> attr = new ArrayList<String>();
+            for(String s : decomposeLhs(df))
+                attr.add(s);
+            bcnf&=findConsc(attr,func).containsAll(getColNames(table));           
+        }
+        return bcnf;
+    }
     /**
      * If we got the attributes in "whatWeGot",then, with the DFs "dfs", we also got the returned attributes
      * @param whatWeGot
