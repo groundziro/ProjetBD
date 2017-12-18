@@ -13,13 +13,25 @@ import java.util.ArrayList;
  */
 public class Key {
     ArrayList<String> attributes;
+    boolean isMinimal;
 
     public Key() {
         attributes=new ArrayList();
+        isMinimal=true;
     }
 
     public Key(ArrayList<String> attributes) {
         this.attributes = attributes;
+        isMinimal=true;
+    }
+
+    public Key(ArrayList<String> attributes, boolean isMinimal) {
+        this.attributes = attributes;
+        this.isMinimal = isMinimal;
+    }
+    
+    public void setIsMinimal(boolean b){
+        this.isMinimal=b;
     }
 
     public void addAttributes(String newAtr){
