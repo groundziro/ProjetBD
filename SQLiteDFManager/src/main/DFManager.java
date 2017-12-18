@@ -135,6 +135,7 @@ public class DFManager {
         }
         return (nf||isBCNF(table));
     }
+    
     public boolean isBCNF(String table) throws SQLException{
         List<DF> dfs = getDFs();
         boolean bcnf = true;
