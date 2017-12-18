@@ -13,8 +13,8 @@ import java.util.ArrayList;
  */
 public class DF {
     String tableName;
-    String lhs;    
-    String rhs;
+    String lhs;    //ex: "id dept"
+    String rhs;    //ex: "name"
     int[] lhsids; //for unnamed 
     int rhsid;    //for unnamed
 

@@ -35,8 +35,12 @@ public class DFManager {
      */
     public ArrayList<Key> getKeys(String table) throws SQLException{
         List<String> atribNames = dbm.getColNames(table);
-        List<DF> dfs = getDFs();
-        
+        List<DF> dfss = getDFs();
+        ArrayList<DF> dfs = new ArrayList<>();
+        for(DF d:dfss){
+            if(d.getTableName().equals(table))
+                dfs.add(d);
+        }
         boolean[] tt=new boolean[atribNames.size()];  //Is is possible to reach attribute i with a DF?
         for(int i=0;i<tt.length;i++){
             tt[i]=false;
@@ -59,13 +63,27 @@ public class DFManager {
     public static ArrayList<Key> recursGetKeys(ArrayList<Key> bag, List<String> attributes, ArrayList<String> alrInKey, ArrayList<String> alrHenced, List<DF> dfs){
         ArrayList<String> remaining=new ArrayList<>();
         ArrayList<Key> result=new ArrayList<>();
+        ArrayList<String> whatWeGot=new ArrayList<>();
+  
+        whatWeGot.addAll(alrInKey);
+        for(String ty:alrHenced){
+            if(! whatWeGot.contains(ty)){
+                whatWeGot.add(ty);
+            }
+        }
+        ArrayList<String> newHenced=findConsc(whatWeGot,dfs);
+
+        
         for(int i=0;i<attributes.size();i++){
-            if(!(alrInKey.contains(attributes.get(i)) || alrHenced.contains(attributes.get(i)))){
+            if(!(alrInKey.contains(attributes.get(i)) || newHenced.contains(attributes.get(i)))){
                 remaining.add(attributes.get(i));
             }
         }
+
         if(remaining.isEmpty()){
-            result.add(new Key(alrInKey));
+            Key k=new Key(alrInKey);
+            //result.add(new Key(alrInKey));
+            result.add(k);
             return result;
         }
         else{
@@ -77,9 +95,12 @@ public class DFManager {
                 newAlrInKey=new ArrayList<>();
                 newAlrInKey.addAll(alrInKey);
                 newAlrInKey.add(rem);
-                boolean newz;
+                
+                //boolean newz;
                 newAlrHenced=findConsc(newAlrInKey,dfs);
-                //THIS PART SHOULD ACTUALLY GO TRROUGH ONCE SINCE findConsc ALREADY RETURN THE CONSC OF THE CONSC
+               
+                //THIS PART SHOULD ACTUALLY GO TRROUGH ONCE SINCE findConsc ALREADY RETURN THE CONSC OF THE 
+                /*
                 editedNewAlrHenced=findConsc(newAlrHenced,dfs);
                 do{
                     newz=false;
@@ -93,8 +114,9 @@ public class DFManager {
                     editedNewAlrHenced=findConsc(newAlrHenced,dfs);
                 //}while(! newAlrHenced.containsAll(editedNewAlrHenced)); 
                 }while(newz);     //while we got more henced with the new henced
+                */
                 //END OF 'THIS PART'
-                subbag=recursGetKeys(bag,attributes,newAlrInKey,newAlrHenced, dfs);
+                subbag=recursGetKeys(bag,attributes,newAlrInKey,alrHenced, dfs);
                 for(Key k:subbag){
                     if(! bag.contains(k))
                         bag.add(k);
@@ -111,6 +133,8 @@ public class DFManager {
      * @return
      */
     public static ArrayList<String> findConsc(ArrayList<String> whatWeGot, List<DF> dfs){
+        ArrayList<String> whatWeGotGot=new ArrayList<>();
+        whatWeGotGot.addAll(whatWeGot);
         String[] cut;
         boolean good;
         ArrayList<String> consc=new ArrayList<>();
@@ -122,20 +146,20 @@ public class DFManager {
                     good=true;
                     cut=df.getLhs().split(" ");
                     for(String part:cut){
-                        if(! whatWeGot.contains(part)){
+                        if(! whatWeGotGot.contains(part)){
                             good=false;
                             break;
                         }
                     }
                     if(good){        
                         consc.add(df.getRhs());
-                        whatWeGot.add(df.getRhs());
+                        whatWeGotGot.add(df.getRhs());
                         added=true;
                     }
                 }
             }
         }while(added);
-        for(String str:whatWeGot){
+        for(String str:whatWeGotGot){
             if(! consc.contains(str))
                 consc.add(str);
         }
@@ -341,92 +365,35 @@ public class DFManager {
         DFManager dfm = new DFManager("test.db");
         //dfm.dbc.printTable("bananes");
         System.out.println("");
-        ArrayList<DFConflict> johlebanjo= dfm.checkConflict();
-        for(int i=0;i<johlebanjo.size();i++){
-            System.out.println(johlebanjo.get(i).message);/*
-            if(johlebanjo.get(i).type==1){
-                DFConflict intru=johlebanjo.get(i);
-                String[] values=new String[intru.getLhs().size()+1];
-                for(int p=0;p<intru.getLhs().size();p++){
-                    values[p]=intru.getLhs().get(p);
-                }
-                String[] cut=intru.getLhconfl().split(",");
-                Object[] values=new Object[cut.length+1];
-                for(int g=0;g<cut.length;g++){
-                    values[g]=cut[g];
-                }
-                values[values.length-1]=intru.getRhconfl().get(0);
-                String attributes="";
-                String lhhs = intru.getDf().getLhs();
-                String p[]= lhhs.split(" ");
-                for(String pp : p){
-                    attributes=attributes+pp+",";
-                }
-                attributes=attributes+intru.getDf().getRhs();
-                dfm.deleteData(intru.getDf().getTableName(),attributes,values);
-                
-            }*/
-            System.out.println("");
+        
+        ArrayList<Key> kk= dfm.getKeys("alpha");
+        System.out.println("-------------------");
+        for(Key k:kk){
+            System.out.println(k);
         }
+        
         /*
-        List<DF> df = dfm.getDFs();
-        
-        System.out.println("\n*.BEFORE THE SORT.*\n");
-        
-        for(int i=0;i<df.size();i++){
-            System.out.print(""+df.get(i).getTableName()+" : ");
-            System.out.println(df.get(i).toString());
-        }
-        
-        System.out.println("\n*.AFTER THE SORT.*\n");
-        
-        ArrayList<ArrayList<DF>> sorted= orderDFList(df);
-        
-        for(int i=0;i<sorted.size();i++){
-            System.out.println("--table: "+sorted.get(i).get(0).getTableName());
-            for(int j=0;j<sorted.get(i).size();j++){
-                System.out.println("     "+sorted.get(i).get(j));
+        System.out.println("°°°°°°°°°°°°°°°°°°°°°°°");
+        ArrayList<String> wwg=new ArrayList<>();
+        wwg.add("name");
+        wwg.add("favcoul");
+        List<DF> dfss = dfm.getDFs();
+        ArrayList<DF> dfs = new ArrayList<>();
+        for(DF d:dfss){
+            if("empl".equals(d.getTableName())){
+                dfs.add(d);
             }
         }
-        */
-      /*
-        System.out.println("ok");
-        DBManager dbc= new DBManager("test.db");
-        dbc.getTabNames();
-        System.out.println("oooooooooooooooook");
-        dbc.getDFs();*/
-        //dbc.createNewTable("bananes","colour text","type text","tasteval integer","avweight real","PRIMARY KEY (colour,type)");
-         // dbc.check();
-        //dbc.createNewTable("warehouse","id integer PRIMARY KEY","name text NOT NULL","capacity real");
-        //dbc.insertData("warehouse","name,capacity","N2",(double)222.2);
-        //dbc.insertData("warehouse","capacity,name","N3",(double)333.3);
-        //dbc.insertData("bananes", "avweight,colour,type,tasteval",1.1,"noir","miam",8);
         
-      //dbc.deleteData("bananes","avweight,colour,tasteval",8.6,"blue",5);
-        //dbc.deleteData("bananes","tasteval",2);
-    //  dbc.printTable("bananes");
-        //dbc.isEmpty("bananes");
-        //dbc.kedis();
-        
-        //connect();
-        //createNewDB("bob.db");
-        //createNewTable();
-        /*
-        insertData("warehouse","W1",309);
-        insertData("warehouse","W2",393);
-        insertData("warehouse","W3",39092);
-        */
-        //check();
-        //System.out.println("---");
-        //updateData(1,"dhghghghef",11243.2);
-        //deleteData(2);
-        //insertData("NOUVEAU",156.5);
-        //check();
-        //System.out.println("---");
-        //createNewTable("trully","id integer PRIMARY KEY","name text NOT NULL","capacity real");
-        //createNewTable("materials","id integer PRIMARY KEY","description text NOT NULL");
-        //createNewTable();
-        
+       // for(DF dd:dfs){
+       //     System.out.println(dd);
+       // }
+        ArrayList<String> bob = findConsc(wwg, dfs);
+        for(String st:bob){
+            System.out.print(st+" - ");
+        }
+     */
+        System.out.println();
     }
     
 }

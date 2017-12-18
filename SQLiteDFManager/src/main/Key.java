@@ -31,6 +31,7 @@ public class Key {
         for(String s : attributes){
             str+=s+" ";
         }
+        str=str.substring(0,str.length()-1);
         str+="]";
         return str;
     }
