@@ -78,9 +78,9 @@ public class DFManager {
                 newAlrInKey.addAll(alrInKey);
                 newAlrInKey.add(rem);
                 boolean newz;
-                newAlrHenced=findConsc(newAlrInKey,attributes,dfs);
+                newAlrHenced=findConsc(newAlrInKey,dfs);
                 //THIS PART SHOULD ACTUALLY GO TRROUGH ONCE SINCE findConsc ALREADY RETURN THE CONSC OF THE CONSC
-                editedNewAlrHenced=findConsc(newAlrHenced,attributes,dfs);
+                editedNewAlrHenced=findConsc(newAlrHenced,dfs);
                 do{
                     newz=false;
                     for(String str:editedNewAlrHenced){
@@ -90,7 +90,7 @@ public class DFManager {
                         }                            
                     }
                     newAlrHenced.addAll(editedNewAlrHenced);
-                    editedNewAlrHenced=findConsc(newAlrHenced,attributes,dfs);
+                    editedNewAlrHenced=findConsc(newAlrHenced,dfs);
                 //}while(! newAlrHenced.containsAll(editedNewAlrHenced)); 
                 }while(newz);     //while we got more henced with the new henced
                 //END OF 'THIS PART'
@@ -105,13 +105,12 @@ public class DFManager {
     }
     
     /**
-     * If we got the attributes in "whatWeGot", a list of the attributes of "attributes", then, with the DFs "dfs", we also got the returned attributes
+     * If we got the attributes in "whatWeGot",then, with the DFs "dfs", we also got the returned attributes
      * @param whatWeGot
-     * @param attributes
      * @param dfs
      * @return
      */
-    public static ArrayList<String> findConsc(ArrayList<String> whatWeGot, List<String> attributes, List<DF> dfs){
+    public static ArrayList<String> findConsc(ArrayList<String> whatWeGot, List<DF> dfs){
         String[] cut;
         boolean good;
         ArrayList<String> consc=new ArrayList<>();
