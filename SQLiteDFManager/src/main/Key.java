@@ -19,6 +19,10 @@ public class Key {
         attributes=new ArrayList();
         isMinimal=true;
     }
+    
+    public Key(boolean b){
+        isMinimal=b;
+    }
 
     public Key(ArrayList<String> attributes) {
         this.attributes = attributes;
