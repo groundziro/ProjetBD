@@ -104,6 +104,15 @@ public class DFManager {
             return bag;
         }
     }
+    public boolean is3NF(String table) throws SQLException{
+        boolean nf = true;
+        List<DF> dfs = getDFs();
+        for(DF df : dfs){
+            for(Key k : getKeys(table))
+                nf&=k.getAttributes().contains(df.getRhs());
+        }
+        return (nf||isBCNF(table));
+    }
     public boolean isBCNF(String table) throws SQLException{
         List<DF> dfs = getDFs();
         boolean bcnf = true;

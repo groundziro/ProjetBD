@@ -34,4 +34,8 @@ public class Key {
         str+="]";
         return str;
     }
+
+    public ArrayList<String> getAttributes() {
+        return attributes;
+    }
 }
