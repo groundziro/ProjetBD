@@ -39,6 +39,7 @@ public class DFManager {
                 for(String attribute : getColNames(table)){
                     if(!k.attributes.contains(attribute)){
                         Key newKey = k;
+                        newKey.setIsMinimal(false);
                         newKey.addAttributes(attribute);
                         if(!toReturn.contains(newKey)){
                             added = true;
