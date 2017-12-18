@@ -136,6 +136,10 @@ public class DFManager {
                 }
             }
         }while(added);
+        for(String str:whatWeGot){
+            if(! consc.contains(str))
+                consc.add(str);
+        }
         return consc;
     }
     
