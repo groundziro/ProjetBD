@@ -331,55 +331,59 @@ public class Interface extends Application {
             });
         }else{
             btn.setOnAction(conflicted->{
-                Alert alert = new Alert(AlertType.INFORMATION,"There's a redundance within the values.\nYou'll have to delete some.\nMake your choice.",ButtonType.OK);
-                alert.showAndWait().ifPresent(cnsmr->{
-                    try {
-                        if(cnsmr==ButtonType.OK){                                                
-                            BorderPane tuples = new BorderPane();
-                            VBox v1 = new VBox(); 
-                            int i=0;
-                            DFConflict df = getConflict(btn.getText());
-                            for(String rh:df.getRhconfl()){
-                                HBox h = new HBox();
-                                Text t = new Text();
-                                t.setText(df.getLhconfl()+" "+rh);                                                    
-                                Button b = new Button(String.valueOf(i));
-                                b.setId(String.valueOf(i));
-                                b.setOnAction(deleted->{
-                                    Alert confirm = new Alert(AlertType.CONFIRMATION,"Do you want to delete this tuple:"+df.getLhconfl()+" "+rh+"?");
-                                    boolean confirmed = false;
-                                    confirm.showAndWait().ifPresent(delete->{
-                                        if(delete==ButtonType.OK && df.getRhconfl().size()>1){
-                                            dfs.deleteOneConflictedData(df, getId(rh,df));
-                                            h.setVisible(false);                                                            
-                                        try {
-                                            if(df.getRhconfl().size()==1){
-                                                BorderPane newConflict = new BorderPane();
-                                                newConflict.setCenter(v);
-                                                conflictStage.setScene(new Scene(newConflict));
+                try {
+                    Alert alert = new Alert(AlertType.INFORMATION,getConflict(btn.getText()).toString()+"\nYou'll have to delete some values.\nMake your choice.",ButtonType.OK);
+                    alert.showAndWait().ifPresent(cnsmr->{
+                        try {
+                            if(cnsmr==ButtonType.OK){
+                                BorderPane tuples = new BorderPane();
+                                VBox v1 = new VBox();
+                                int i=0;
+                                DFConflict df = getConflict(btn.getText());
+                                for(String rh:df.getRhconfl()){
+                                    HBox h = new HBox();
+                                    Text t = new Text();
+                                    t.setText(df.getLhconfl()+" "+rh);
+                                    Button b = new Button(String.valueOf(i));
+                                    b.setId(String.valueOf(i));
+                                    b.setOnAction(deleted->{
+                                        Alert confirm = new Alert(AlertType.CONFIRMATION,"Do you want to delete this tuple:"+df.getLhconfl()+" "+rh+"?");
+                                        boolean confirmed = false;
+                                        confirm.showAndWait().ifPresent(delete->{
+                                            if(delete==ButtonType.OK && df.getRhconfl().size()>1){
+                                                dfs.deleteOneConflictedData(df, getId(rh,df));
+                                                h.setVisible(false);
+                                                try {
+                                                    if(df.getRhconfl().size()==1){
+                                                        BorderPane newConflict = new BorderPane();
+                                                        newConflict.setCenter(v);
+                                                        conflictStage.setScene(new Scene(newConflict));
+                                                    }
+                                                    if(dfs.checkConflict().isEmpty()){
+                                                        conflictStage.close();
+                                                        primaryStage.show();
+                                                    }
+                                                } catch (SQLException ex) {
+                                                    Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
+                                                }
                                             }
-                                            if(dfs.checkConflict().isEmpty()){
-                                                conflictStage.close();
-                                                primaryStage.show();
-                                            }
-                                        } catch (SQLException ex) {
-                                            Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
-                                        }
-                                        }
+                                        });
                                     });
-                                });
-                                i++;
-                                h.getChildren().addAll(t,b);
-                                v1.getChildren().add(h);
-                            }                                                 
-                            tuples.setCenter(v1);
-                            conflictStage.setScene(new Scene(tuples));
+                                    i++;
+                                    h.getChildren().addAll(t,b);
+                                    v1.getChildren().add(h);
+                                }
+                                tuples.setCenter(v1);
+                                conflictStage.setScene(new Scene(tuples));
+                            }
+                        } catch (SQLException ex) {
+                            Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                    } catch (SQLException ex) {
-                        Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                });
-                btn.setVisible(false);
+                    });
+                    btn.setVisible(false);
+                } catch (SQLException ex) {
+                    Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
+                }
             });
         }
         v.getChildren().add(btn);

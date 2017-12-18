@@ -27,7 +27,29 @@ public class DFManager {
         this.dbm = dbc;
         checkFuncDep();
     }   
-   
+    
+    
+    ArrayList<Key> getSuperKeys(String table) throws SQLException{
+        ArrayList<Key> toReturn = new ArrayList<>();
+        toReturn.addAll(getKeys(table));
+        boolean added = false;
+        do{
+            added = false;
+            for(Key k : toReturn){
+                for(String attribute : getColNames(table)){
+                    if(!k.attributes.contains(attribute)){
+                        Key newKey = k;
+                        newKey.addAttributes(attribute);
+                        if(!toReturn.contains(newKey)){
+                            added = true;
+                            toReturn.add(newKey);
+                        }
+                    }
+                }                
+            }
+        }while(added);
+        return toReturn;
+    }
     /**
      * Given a table, return all the keys of the table
      * @param table
