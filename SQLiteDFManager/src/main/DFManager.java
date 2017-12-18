@@ -27,7 +27,12 @@ public class DFManager {
         checkFuncDep();
     }   
    
-    
+    /**
+     * Given a table, return all the keys of the table
+     * @param table
+     * @return
+     * @throws SQLException
+     */
     public ArrayList<Key> getKeys(String table) throws SQLException{
         List<String> atribNames = dbm.getColNames(table);
         List<DF> dfs = getDFs();
@@ -66,12 +71,18 @@ public class DFManager {
         else{
             ArrayList<String> newAlrInKey;
             ArrayList<String> newAlrHenced;
+            ArrayList<String> editedNewAlrHenced=new ArrayList<>();
             ArrayList<Key> subbag;
             for(String rem:remaining){
                 newAlrInKey=new ArrayList<>();
                 newAlrInKey.addAll(alrInKey);
                 newAlrInKey.add(rem);
-                newAlrHenced=findConsc(alrInKey,attributes,dfs);
+                newAlrHenced=findConsc(newAlrInKey,attributes,dfs);
+                do{
+                    newAlrHenced.addAll(editedNewAlrHenced);
+                    editedNewAlrHenced=findConsc(newAlrHenced,attributes,dfs);
+                }while(! newAlrHenced.containsAll(editedNewAlrHenced)); //while we got more henced with the new henced
+                        
                 subbag=recursGetKeys(bag,attributes,newAlrInKey,newAlrHenced, dfs);
                 for(Key k:subbag){
                     if(! bag.contains(k))
