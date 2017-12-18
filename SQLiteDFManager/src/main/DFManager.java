@@ -10,6 +10,7 @@ package main;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -125,7 +126,27 @@ public class DFManager {
             return bag;
         }
     }
-    
+    public boolean is3NF(String table) throws SQLException{
+        boolean nf = true;
+        List<DF> dfs = getDFs();
+        for(DF df : dfs){
+            for(Key k : getKeys(table))
+                nf&=k.getAttributes().contains(df.getRhs());
+        }
+        return (nf||isBCNF(table));
+    }
+    public boolean isBCNF(String table) throws SQLException{
+        List<DF> dfs = getDFs();
+        boolean bcnf = true;
+        for(DF df : dfs){
+            List<DF> func = new ArrayList<>();
+            func.add(df);
+            ArrayList<String> attr = new ArrayList<>();
+            attr.addAll(Arrays.asList(decomposeLhs(df)));
+            bcnf&=findConsc(attr,func).containsAll(getColNames(table));           
+        }
+        return bcnf;
+    }
     /**
      * If we got the attributes in "whatWeGot",then, with the DFs "dfs", we also got the returned attributes
      * @param whatWeGot
