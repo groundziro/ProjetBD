@@ -31,7 +31,7 @@ public class DFManager {
     public ArrayList<Key> getKeys(String table) throws SQLException{
         List<String> atribNames = dbm.getColNames(table);
         List<DF> dfs = getDFs();
-        Key curKey=new Key();
+        
         boolean[] tt=new boolean[atribNames.size()];  //Is is possible to reach attribute i with a DF?
         for(int i=0;i<tt.length;i++){
             tt[i]=false;
@@ -40,11 +40,77 @@ public class DFManager {
             for(DF curDf:dfs){
                 if(curDf.getRhs().equals(atribNames.get(i))){
                     tt[i]=true;
-                    break;
                 }
             }
         }
+        ArrayList<String> alrInKey=new ArrayList<>();
+        for(int i=0;i<tt.length;i++){
+            if(!tt[i])        //If this attribute is reached by 0 DF, then it is in all the keys
+                alrInKey.add(atribNames.get(i));
+        }
+        return recursGetKeys(new ArrayList<Key>(), atribNames, alrInKey, new ArrayList<String>(), dfs);
     }
+    
+    public static ArrayList<Key> recursGetKeys(ArrayList<Key> bag, List<String> attributes, ArrayList<String> alrInKey, ArrayList<String> alrHenced, List<DF> dfs){
+        ArrayList<String> remaining=new ArrayList<>();
+        ArrayList<Key> result=new ArrayList<>();
+        for(int i=0;i<attributes.size();i++){
+            if(!(alrInKey.contains(attributes.get(i)) || alrHenced.contains(attributes.get(i)))){
+                remaining.add(attributes.get(i));
+            }
+        }
+        if(remaining.isEmpty()){
+            result.add(new Key(alrInKey));
+            return result;
+        }
+        else{
+            ArrayList<String> newAlrInKey;
+            ArrayList<String> newAlrHenced;
+            ArrayList<Key> subbag;
+            for(String rem:remaining){
+                newAlrInKey=new ArrayList<>();
+                newAlrInKey.addAll(alrInKey);
+                newAlrInKey.add(rem);
+                newAlrHenced=findConsc(alrInKey,attributes,dfs);
+                subbag=recursGetKeys(bag,attributes,newAlrInKey,newAlrHenced, dfs);
+                for(Key k:subbag){
+                    if(! bag.contains(k))
+                        bag.add(k);
+                }
+            }
+            return bag;
+        }
+    }
+    
+    /**
+     * If we got the attributes in "whatWeGot", a list of the attributes of "attributes", then, with the DFs "dfs", we also got the returned attributes
+     * @param whatWeGot
+     * @param attributes
+     * @param dfs
+     * @return
+     */
+    public static ArrayList<String> findConsc(ArrayList<String> whatWeGot, List<String> attributes, List<DF> dfs){
+        String[] cut;
+        boolean good;
+        ArrayList<String> consc=new ArrayList<>();
+        for(DF df:dfs){
+            if(! consc.contains(df.getRhs())){
+                good=true;
+                cut=df.getLhs().split(" ");
+                for(String part:cut){
+                    if(! whatWeGot.contains(part)){
+                        good=false;
+                        break;
+                    }
+                }
+                if(good){        
+                    consc.add(df.getRhs());
+                }
+            }
+        }
+        return consc;
+    }
+    
      /**
      * Take en ArrayList of DF and give an ArrayList of ArrayList of dF.
      * Each ArrayList(second level) of DF countains DF of the same table.
