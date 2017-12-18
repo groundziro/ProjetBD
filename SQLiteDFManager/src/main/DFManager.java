@@ -71,18 +71,28 @@ public class DFManager {
         else{
             ArrayList<String> newAlrInKey;
             ArrayList<String> newAlrHenced;
-            ArrayList<String> editedNewAlrHenced=new ArrayList<>();
+            ArrayList<String> editedNewAlrHenced;
             ArrayList<Key> subbag;
             for(String rem:remaining){
                 newAlrInKey=new ArrayList<>();
                 newAlrInKey.addAll(alrInKey);
                 newAlrInKey.add(rem);
+                boolean newz;
                 newAlrHenced=findConsc(newAlrInKey,attributes,dfs);
+                editedNewAlrHenced=findConsc(newAlrHenced,attributes,dfs);
                 do{
+                    newz=false;
+                    for(String str:editedNewAlrHenced){
+                        if(! newAlrHenced.contains(str)){
+                            newAlrHenced.add(str);
+                            newz=true;
+                        }                            
+                    }
                     newAlrHenced.addAll(editedNewAlrHenced);
                     editedNewAlrHenced=findConsc(newAlrHenced,attributes,dfs);
-                }while(! newAlrHenced.containsAll(editedNewAlrHenced)); //while we got more henced with the new henced
-                        
+                //}while(! newAlrHenced.containsAll(editedNewAlrHenced)); 
+                }while(newz);     //while we got more henced with the new henced
+                
                 subbag=recursGetKeys(bag,attributes,newAlrInKey,newAlrHenced, dfs);
                 for(Key k:subbag){
                     if(! bag.contains(k))
