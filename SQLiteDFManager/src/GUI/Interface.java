@@ -255,7 +255,23 @@ public class Interface extends Application {
                 VBox v = new VBox();
                 for(Button b : btns){
                     b.setOnAction(check1->{
-                        checkBCNF(b.getText());
+                        BorderPane newChoice = new BorderPane();
+                        Button BCNF = new Button("BCNF");
+                        Button NF = new Button("3NF");
+                        BCNF.setOnAction(bcnf->{
+                            Alert alert = new Alert(AlertType.CONFIRMATION,"Do you wanna check if "+b.getText()+" is BCNF?");
+                            alert.showAndWait().ifPresent(cnsmr->{
+                                if(cnsmr == ButtonType.OK)
+                                   checkBCNF(b.getText());
+                            });
+                        });
+                        NF.setOnAction(nf->{
+                            Alert alert = new Alert(AlertType.CONFIRMATION,"Do you wanna check if "+b.getText()+" is 3NF?");
+                            alert.showAndWait().ifPresent(cnsmr->{
+                                if(cnsmr == ButtonType.OK)
+                                   check3NF(b.getText());
+                            });
+                        });
                         check3NF(b.getText());
                     });
                     v.getChildren().add(b);
@@ -458,9 +474,15 @@ public class Interface extends Application {
     private void delete(String df)throws SQLException{
         dfs.getDB().deleteDF("lhs,rhs", df.substring(0, df.indexOf(" -")),df.substring(df.indexOf(">")+2));
     }
-    private boolean check3NF(String table){
-        //return DF.check3NF(table);
-        return true;
+    private void check3NF(String table){
+        if(dfs.check3NF(table)){
+            Alert alert = new Alert(AlertType.INFORMATION,"This table is in 3NF");
+            alert.showAndWait();
+        }
+        else{
+            dfs.decompose(table);
+        }
+        
     } 
     private boolean checkBCNF(String table){
         //return DF.checkBCNF(table);
