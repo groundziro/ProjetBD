@@ -10,6 +10,7 @@ package main;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,9 +110,8 @@ public class DFManager {
         for(DF df : dfs){
             List<DF> func = new ArrayList<>();
             func.add(df);
-            ArrayList<String> attr = new ArrayList<String>();
-            for(String s : decomposeLhs(df))
-                attr.add(s);
+            ArrayList<String> attr = new ArrayList<>();
+            attr.addAll(Arrays.asList(decomposeLhs(df)));
             bcnf&=findConsc(attr,func).containsAll(getColNames(table));           
         }
         return bcnf;
