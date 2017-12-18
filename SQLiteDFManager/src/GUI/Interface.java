@@ -264,6 +264,7 @@ public class Interface extends Application {
                                 if(cnsmr == ButtonType.OK)
                                    try {
                                        checkBCNF(b.getText());
+                                       Return.fire();
                                 } catch (SQLException ex) {
                                     Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
                                 }
@@ -273,10 +274,15 @@ public class Interface extends Application {
                             Alert alert = new Alert(AlertType.CONFIRMATION,"Do you wanna check if "+b.getText()+" is 3NF?");
                             alert.showAndWait().ifPresent(cnsmr->{
                                 if(cnsmr == ButtonType.OK)
-                                   check3NF(b.getText());
+                                   try {
+                                       check3NF(b.getText());
+                                       Return.fire();
+                                } catch (SQLException ex) {
+                                    Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
+                                }
                             });
                         });
-                        check3NF(b.getText());
+                        //check3NF(b.getText());
                     });
                     v.getChildren().add(b);
                 }
@@ -479,18 +485,34 @@ public class Interface extends Application {
     private void delete(String df)throws SQLException{
         dfs.getDB().deleteDF("lhs,rhs", df.substring(0, df.indexOf(" -")),df.substring(df.indexOf(">")+2));
     }
-    private void check3NF(String table){
-        /*if(dfs.check3NF(table)){
-            Alert alert = new Alert(AlertType.INFORMATION,"This table is in 3NF");
-            alert.showAndWait();
-        }
-        else{
-            dfs.decompose(table);
-        }*/
-        
+    private void check3NF(String table) throws SQLException{
+       if(dfs.is3NF(table)){
+           Alert alert = new Alert(AlertType.INFORMATION,"This table is in 3NF.");
+           alert.showAndWait();
+       }else{
+           Alert alert = new Alert(AlertType.CONFIRMATION,"This table isn't in 3NF. Do you want a decomposition?");
+           alert.showAndWait().ifPresent(cnsmr->{
+               if(cnsmr==ButtonType.OK)
+                   System.out.println("Decomposition in progress...");
+           });
+       }
     } 
-    private boolean checkBCNF(String table) throws SQLException{
-        return dfs.isBCNF(table);
+    private void checkBCNF(String table) throws SQLException{
+        if(dfs.isBCNF(table)){
+            Alert alert = new Alert(AlertType.INFORMATION,"This table is in BCNF.");
+            alert.showAndWait();
+        }else{
+            Alert alert = new Alert(AlertType.CONFIRMATION,"This table isn't in BCNF.\nDo you wanna check if it's in 3NF?");
+            alert.showAndWait().ifPresent(cnsmr->{
+                if(cnsmr==ButtonType.OK){
+                    try {
+                        check3NF(table);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            });
+        }
     }
     
     /**
