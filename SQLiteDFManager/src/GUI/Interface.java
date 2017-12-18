@@ -61,7 +61,15 @@ public class Interface extends Application {
             }
             try {
                 if(!dfs.checkConflict().isEmpty()){
-                    conflicts(primaryStage);
+                    Alert alert = new Alert(AlertType.INFORMATION, "There's conflicts in your DB.\nLet's reolve them.");
+                    alert.showAndWait().ifPresent(cnsmr->{
+                        try {
+                            conflicts(primaryStage);
+                        } catch (SQLException ex) {
+                            Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    });
+                    
                 }else{
                     init(primaryStage,p,scene);
                 }
@@ -203,6 +211,7 @@ public class Interface extends Application {
             Exit.setOnAction(quit->{
                 primaryStage.setScene(scene);
             });
+            Exit.setCancelButton(true);
             Delete.setOnAction((ActionEvent del)->{
                 List<Button> dfBtns = new ArrayList<>();
                 try{
@@ -253,15 +262,16 @@ public class Interface extends Application {
                 choice.setCenter(v);
                 primaryStage.setScene(new Scene(choice));
             });
+            Check.setDefaultButton(true);
             primaryStage.setScene(Tables);
     }
     /**
      *
      * @param primaryStage
-     * @param conflictBtns
      * @throws SQLException
      */
     protected void conflicts(Stage primaryStage) throws SQLException{
+        Text instructions = new Text("Click on a button to resolve the conflict induced with the functional dependency");
         primaryStage.hide();
         ArrayList<Button> conflictBtns = getConflicts();
         Stage conflictStage = new Stage();
@@ -272,7 +282,7 @@ public class Interface extends Application {
             btn.setOnAction(conflicted -> {
                 Alert alert = null;
                 try {
-                    alert = new Alert(AlertType.CONFIRMATION,"This DF needs to be deleted, because : "+getConflict(btn.getText()).toString()+". Do you want it ?");
+                    alert = new Alert(AlertType.CONFIRMATION,"This DF needs to be deleted, \nbecause : "+getConflict(btn.getText()).toString()+"\nDo you want it ?");
                     alert.showAndWait().ifPresent(cnsmr->{
                     if(cnsmr==ButtonType.OK){
                         try{
@@ -294,7 +304,7 @@ public class Interface extends Application {
             });
         }else{
             btn.setOnAction(conflicted->{
-                Alert alert = new Alert(AlertType.INFORMATION,"There's a redundance within the values. You'll have to delete some. Make your choice.",ButtonType.OK);
+                Alert alert = new Alert(AlertType.INFORMATION,"There's a redundance within the values.\nYou'll have to delete some.\nMake your choice.",ButtonType.OK);
                 alert.showAndWait().ifPresent(cnsmr->{
                     try {
                         if(cnsmr==ButtonType.OK){                                                
@@ -346,7 +356,8 @@ public class Interface extends Application {
             });
         }
         v.getChildren().add(btn);
-    }                    
+    }
+    conflict.setTop(instructions);
     conflict.setCenter(v);
     conflictStage.setScene(new Scene(conflict));
     conflictStage.setTitle("Conflicts");
@@ -384,7 +395,7 @@ public class Interface extends Application {
         ArrayList<ArrayList<DF>> array = DFManager.orderDFList(df.getDFs());
         for(ArrayList<DF> table : array){
             str+= table.get(0).getTableName()+":\n";
-            str+= df.getKeys(table.get(0).getTableName());
+            //str+= df.getKeys(table.get(0).getTableName());
             for(DF func : table){
                     str+="\t"+func.toString()+"\n";
             }
