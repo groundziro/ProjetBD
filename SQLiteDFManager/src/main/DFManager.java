@@ -25,14 +25,8 @@ public class DFManager {
     public DFManager(DBManager dbc) throws SQLException {
         this.dbm = dbc;
         checkFuncDep();
-    }
+    }   
    
-    /**
-     * Take en ArrayList of DF and give an ArrayList of ArrayList of dF.
-     * Each ArrayList(second level) of DF countains DF of the same table.
-     * @param lis
-     * @return
-     */
     
     public ArrayList<Key> getKeys(String table) throws SQLException{
         List<String> atribNames = dbm.getColNames(table);
@@ -51,7 +45,12 @@ public class DFManager {
             }
         }
     }
-    
+     /**
+     * Take en ArrayList of DF and give an ArrayList of ArrayList of dF.
+     * Each ArrayList(second level) of DF countains DF of the same table.
+     * @param lis
+     * @return
+     */
     public static ArrayList<ArrayList<DF>> orderDFList(List<DF> lis){
         int tabl;
         ArrayList<ArrayList<DF>> result= new ArrayList<>();
