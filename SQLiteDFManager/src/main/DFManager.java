@@ -279,7 +279,8 @@ public class DFManager {
     }
      public ArrayList<String> closure(ArrayList<String> X, ArrayList<DF> F){
         ArrayList<String> oldDep = new ArrayList<>();
-        ArrayList<String> newDep = X;
+        ArrayList<String> newDep = new ArrayList<>();
+        newDep.addAll(X);
         while(!newDep.containsAll(oldDep)){
             oldDep = newDep;
             for(DF df:F){
@@ -296,6 +297,21 @@ public class DFManager {
         return newDep;
     }
     
+    public ArrayList<DF> getRedundants(ArrayList<DF> F){
+        ArrayList<DF> redundants = new ArrayList<>();
+        ArrayList<DF> G = new ArrayList<>();
+        G.addAll(F);
+        for(DF df: F){
+            ArrayList<DF> newF = new ArrayList<>();
+            newF.addAll(G);
+            newF.remove(df);
+            if(member(newF,df)){
+                redundants.add(df);
+            }
+            G=newF;
+        }
+        return redundants;
+    } 
     public boolean member(ArrayList<DF> F, DF df){
         ArrayList<String> lhs = new ArrayList<>();
         for(String s : decomposeLhs(df))
