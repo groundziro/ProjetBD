@@ -179,6 +179,12 @@ public class DFManager {
         }
     }
     
+    /**
+     * Given a table, return true if the table (and her DFs) are 3NF. False otherwise
+     * @param table
+     * @return true if 3NF, false otherwise
+     * @throws SQLException
+     */
     public boolean is3NF(String table) throws SQLException{
         List<DF> dfss = getDFs();
         ArrayList<DF> dfs = new ArrayList<>();
@@ -204,7 +210,12 @@ public class DFManager {
         return true;
     }
     
-    
+    /**
+     * Given a table, return true if the table (and her DFs) are BCNF. False otherwise
+     * @param table
+     * @return true if BCNF, false otheriwse
+     * @throws SQLException
+     */
     public boolean isBCNF(String table) throws SQLException{
         List<DF> dfss = getDFs();
         ArrayList<DF> dfs = new ArrayList<>();
@@ -226,6 +237,12 @@ public class DFManager {
         return true;
     }
     
+    /**
+     * Check if one attribute is part of one key
+     * @param atr the attribute to check
+     * @param keys the list of the concerned keys
+     * @return
+     */
     public static boolean isPrm(String atr, List<Key> keys){
         for(Key k:keys){
             if(k.getAttributes().contains(atr))
@@ -234,6 +251,12 @@ public class DFManager {
         return false;
     }
     
+    /**
+     * Check if one tab of attribute is one key or one super key
+     * @param atrb the tab of attributes
+     * @param keys a list of the concerned keys
+     * @return
+     */
     public static boolean isOneOfTheKey(String[] atrb, List<Key> keys){
         boolean isThisOne;
         ArrayList<String> atrbArray=new ArrayList<>();
@@ -406,6 +429,87 @@ public class DFManager {
         return conflicts;
     }
     
+    public String decompose3NF(String table) throws SQLException, Exception{
+        if(is3NF(table))   
+            return "The table "+table+" already respect 3NF";   //Nothing to do if the table is already 3NF
+        
+        List<DF> dfss = getDFs();
+        ArrayList<DF> dfs = new ArrayList<>();
+        for(DF d:dfss){
+            if(d.getTableName().equals(table))
+                dfs.add(d);
+        }
+        
+        createTables(table,dfs);
+        //1: Une table par DF
+        //2: Une table pour la clé
+        //3: Supprimer redondances
+        
+        return "yo";
+    }
+    
+    /**
+     * Create a table of each DF (for 3NF decomposition purpose)
+     * Note that the type of all the attributes will be text (SQLite doesn't really care about the type of his attributes anyway...)
+     * @param table
+     * @param dfs
+     * @return
+     */
+    public String createTables(String table, List<DF> dfs) throws Exception{
+        String[] a1;
+        String[] a;
+        String[] b;
+        Integer[] c;
+        ArrayList<Integer> idConcerned;
+        ResultSet tuples;
+        ArrayList<String> vals;
+        ArrayList<Object> arObjs;
+        String tablename;
+        for(int q=0;q<dfs.size();q++){
+            a1=dfs.get(q).getLhs().split(" ");
+            a=new String[a1.length+1];
+            for(int s=0;s<a1.length;s++){
+                a[s]=a1[s];
+            }
+            a[a.length-1]=dfs.get(q).getRhs();
+            b=new String[a.length];
+            for(int i=0;i<a.length;i++){
+                b[i]="text";
+            }
+            c=new Integer[(a.length)-1];
+            for(int k=0;k<c.length;k++){
+                c[k]=k;
+            }
+            tablename=table+String.valueOf(q);
+            dbm.createNewTable(tablename,a,b,c);
+            
+            //ID concerned
+            vals = new ArrayList(Arrays.asList(a));
+            idConcerned=dbm.getIdConcerned(table,vals);
+            
+            String attributes="";
+            for(int bv=0;bv<a.length;bv++){
+                attributes=attributes+a[bv]+",";
+            }
+            attributes=attributes.substring(0, attributes.length()-1);
+            
+            tuples = dbm.getTableDatas(table); 
+            while(tuples.next()){
+                arObjs=new ArrayList<Object>();
+                for(Integer in:idConcerned){
+                    arObjs.add(tuples.getObject(in+1));
+                }
+                Object[] tabObjs = new Object[arObjs.size()];
+                for(int w=0;w<arObjs.size();w++)
+                    tabObjs[w]=arObjs.get(w);
+                dbm.insertData(tablename, attributes , tabObjs);
+            }
+        }
+        return "tables "+table+"[0-"+String.valueOf(dfs.size())+"] created";
+    }
+            
+    
+    
     public static String[] decomposeLhs(DF df){
         return df.getLhs().split(" ");
     }
@@ -462,7 +566,7 @@ public class DFManager {
         deleteData(intru.getDf().getTableName(),attributes,values);
         intru.removeLh(intru.getRhconfl().get(0));
     }
-   
+  
     
     public void deleteOneConflictedData(DFConflict intru, int id){
         String[] cut=intru.getLhconfl().split(",");
@@ -489,45 +593,29 @@ public class DFManager {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException, Exception {
         DFManager dfm = new DFManager("test.db");
         //dfm.dbc.printTable("bananes");
         System.out.println("");
+          
+        dfm.decompose3NF("warehouse");
         
+        /*
+        ArrayList<String> ad=new ArrayList<>();
+        ad.add("name");
+        ad.add("capacity");
+        ad.add("id");
+        System.out.println(dfm.dbm.getIdConcerned("warehouse", ad));
+        */
         
+        /*
         ArrayList<Key> kk= dfm.getKeys("alpha");
         System.out.println("-------------------");
         for(Key k:kk){
             System.out.println(k);
         }
-        System.out.println("zzzzzzzzzzzzzzzzz");
-        for(Key k:dfm.getSuperKeys("alpha")){
-            System.out.println(k.toString());
-        }
-        
-        
-        
-        /*
-        System.out.println("°°°°°°°°°°°°°°°°°°°°°°°");
-        ArrayList<String> wwg=new ArrayList<>();
-        wwg.add("name");
-        wwg.add("favcoul");
-        List<DF> dfss = dfm.getDFs();
-        ArrayList<DF> dfs = new ArrayList<>();
-        for(DF d:dfss){
-            if("empl".equals(d.getTableName())){
-                dfs.add(d);
-            }
-        }
-        
-       // for(DF dd:dfs){
-       //     System.out.println(dd);
-       // }
-        ArrayList<String> bob = findConsc(wwg, dfs);
-        for(String st:bob){
-            System.out.print(st+" - ");
-        }
-     */
+        */
+         
         System.out.println();
     }
     

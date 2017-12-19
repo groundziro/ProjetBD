@@ -78,6 +78,38 @@ public class DBManager {
     }
     
     /**
+     * Create a table.
+     * Example use:
+     *    String[] a={"A","B","C"};
+     *    String[] b={"text","text","text"};
+     *    Integer[] c ={0,1};
+     *    createTable("TheNewTab",a,b,c); 
+     * @param name the name of the table
+     * @param atrNames the name of the attributes
+     * @param classes the type of the attributes
+     * @param prKeyRefs the id (int) of the attributes beeing part of the primary key
+     * @throws Exception
+     */
+    public void createNewTable(String name, String[] atrNames, String[] classes, Integer[] prKeyRefs) throws Exception{
+        if(atrNames.length != classes.length){
+            throw new Exception("atrNames and classes should have the same size");
+        }
+        String sqlStm="CREATE TABLE IF NOT EXISTS "+name+"(\n";
+        for(int i=0;i<atrNames.length;i++){
+            sqlStm=sqlStm+" "+atrNames[i]+" "+classes[i]+",\n";
+        }
+        sqlStm=sqlStm+" PRIMARY KEY(";
+        for(int i=0;i<prKeyRefs.length;i++){
+            sqlStm=sqlStm+atrNames[i]+",";
+        }
+        sqlStm=sqlStm.substring(0,sqlStm.length()-1);
+        sqlStm=sqlStm+")\n";
+        sqlStm=sqlStm+");";
+        //System.out.println(sqlStm);
+        executeStatement(sqlStm);
+    }
+    
+    /**
      * Execute the given SQL command
      * @param sqlStm The SQL code to be executed
      */
@@ -117,12 +149,17 @@ public class DBManager {
             pstmt.executeUpdate();
         }
         catch(SQLException e){
-            System.out.println(e.getMessage());
+            //System.out.println(e.getMessage());
+            //Ignored because 3NF decomposition could volontary generate data not respecting unique priv key
         }
     }
+    
+    
+    
     public void insertDF(String attributes,Object... values){
         insertData("FuncDep",attributes,values);
     }
+    
     /**
      * Delete entries from the DB. Only accept equality conditions
      * ex use:
@@ -157,6 +194,7 @@ public class DBManager {
     public void deleteDF(String attributes, Object... values){
         deleteData("FuncDep",attributes,values);
     }
+    
     public ResultSet executeQuery(String sqlStm) throws SQLException{
         Statement stmt=conn.createStatement();
         ResultSet rs=stmt.executeQuery(sqlStm);
@@ -244,6 +282,19 @@ public class DBManager {
             return true;
         else
             return false;
+    }
+    
+    public ArrayList<Integer> getIdConcerned(String table, ArrayList<String> atrNames) throws SQLException{
+        List<String> attributes=getColNames(table);
+        ArrayList<Integer> r = new ArrayList<>();
+        for(String currentAtr:atrNames){
+            for(int i=0;i<attributes.size();i++){
+                if(currentAtr.equals(attributes.get(i))){
+                    r.add(i);
+                }
+            }
+        }
+        return r;
     }
     
     public void printTable(String table){
