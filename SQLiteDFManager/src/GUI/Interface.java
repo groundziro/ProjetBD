@@ -114,10 +114,10 @@ public class Interface extends Application {
             Button Modify = new Button("Modify...");
             Button Delete = new Button("Delete...");
             Button Return = new Button("Return");
-            Button SuperKeys = new Button("SuperKeys");
-            p.setBottom(new HBox(Add,Exit,Check,Modify,Delete,SuperKeys));
+            p.setBottom(new HBox(Add,Exit,Check,Modify,Delete));
             try{
                 p.setCenter(current(dfs));
+                p.setRight(currentSuperKeys());
             }catch(SQLException e){
                 System.out.println(e.getMessage());
             }
@@ -126,13 +126,14 @@ public class Interface extends Application {
                 BorderPane newP = new BorderPane();
                 try{
                     newP.setCenter(current(dfs));
+                    newP.setRight(currentSuperKeys());
                     if(!dfs.checkConflict().isEmpty()){
                         conflicts(primaryStage);
                     }
                 }catch(SQLException e){
                     System.out.println(e.getMessage());
                 }
-                newP.setBottom(new HBox(Add,Exit,Check,Modify,Delete,SuperKeys));
+                newP.setBottom(new HBox(Add,Exit,Check,Modify,Delete));
                 Scene newTables = new Scene(newP);
                 primaryStage.setScene(newTables);
             });
@@ -171,7 +172,7 @@ public class Interface extends Application {
                     });
                 });
                 choice.setCenter(v);
-                choice.setBottom(confirm);
+                choice.setBottom(new HBox(confirm,Return));
                 primaryStage.setScene(new Scene(choice));
             });
             Modify.setOnAction(mod->{
@@ -217,6 +218,7 @@ public class Interface extends Application {
                     });
                     v.getChildren().add(b);
                 }
+                h.getChildren().add(Return);
                 choice.setCenter(v);
                 choice.setBottom(h);
                 primaryStage.setScene(new Scene(choice));
@@ -291,18 +293,8 @@ public class Interface extends Application {
                             });
                         });
                         newChoice.setCenter(new HBox(BCNF,NF));
+                        newChoice.setBottom(Return);
                         primaryStage.setScene(new Scene(newChoice));
-            });
-            SuperKeys.setOnAction(superK->{
-                Alert alert = new Alert(AlertType.CONFIRMATION,"Do you want to show the super keys of the database?");
-                alert.showAndWait().ifPresent(cnsmr->{
-                    try {
-                        Text superKeys = currentSuperKeys();
-                        p.setRight(superKeys);
-                    } catch (SQLException ex) {
-                        Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                });
             });
             Check.setDefaultButton(true);
             primaryStage.setScene(Tables);
@@ -445,6 +437,7 @@ public class Interface extends Application {
             for(Key k : dfs.getSuperKeys(table.get(0).getTableName())){
                 str+="\t"+k.toString()+"\n";
             }
+            str+="------------------------------------\n";
         }
         txt.setText(str);
         return txt;
