@@ -471,7 +471,9 @@ public class DFManager {
     
     public void transferDFs(DFManager newDFM) throws SQLException{
         List<DF> dfs = getDFs();
-        //insertDF("table",Object... values)
+        for(DF df:dfs){
+        newDFM.dbm.insertDF(df.getTableName(),df.getLhs(),df.getRhs());
+        }
     }
     
     /**
@@ -698,7 +700,9 @@ public class DFManager {
         System.out.println("");
           
         //dfm.decompose3NF("warehouse");
-        dfm.decompose3NF();
+            //dfm.decompose3NF();
+        DFManager dfm2 = new DFManager("test_3NF.db");
+        dfm.dbm.transferTable(dfm2.dbm);
         
         /*
         ArrayList<String> ad=new ArrayList<>();
