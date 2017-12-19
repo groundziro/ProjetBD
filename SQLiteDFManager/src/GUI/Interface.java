@@ -432,6 +432,8 @@ public class Interface extends Application {
         return null;
     }
     private Text current(DFManager df) throws SQLException{
+        if(df.getDFs().isEmpty())
+            return new Text("The \"FuncDep\" table is empty, please fill it.");
         Text txt = new Text();
         String str="";
         ArrayList<ArrayList<DF>> array = DFManager.orderDFList(df.getDFs());
