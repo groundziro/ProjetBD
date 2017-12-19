@@ -22,9 +22,15 @@ import java.util.List;
 public class DBManager {
 
     Connection conn;
+    String name;
+
+    public String getName() {
+        return name;
+    }
     
     public DBManager(String path) {
         conn=connect(path);
+        name=path;
     }
     
     /**

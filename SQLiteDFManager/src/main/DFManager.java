@@ -429,33 +429,59 @@ public class DFManager {
         return conflicts;
     }
     
-    public String decompose3NF(String table) throws SQLException, Exception{
-        if(is3NF(table))   
-            return "The table "+table+" already respect 3NF";   //Nothing to do if the table is already 3NF
-        
-        List<DF> dfss = getDFs();
-        ArrayList<DF> dfs = new ArrayList<>();
-        for(DF d:dfss){
-            if(d.getTableName().equals(table))
-                dfs.add(d);
+    /**
+     * Pre-conditoins: DFs are respected
+     * @return
+     * @throws SQLException
+     */
+    public String decompose3NF() throws SQLException, Exception{
+        List<String> not3NFTables = new ArrayList<>();
+        List<String> okTables = new ArrayList<>();
+        for(String tabName:getTabNames()){
+            if(!is3NF(tabName)){
+                not3NFTables.add(tabName);
+            }
+            else{
+                okTables.add(tabName);
+            }
+        }
+        if(not3NFTables.size()==0){
+            return "nothing to do here";
         }
         
-        createTables(table,dfs);
-        //1: Une table par DF
-        //2: Une table pour la clé
-        //3: Supprimer redondances
+        DFManager newDfm=new DFManager(""+dbm.getName().substring(0,dbm.getName().length()-3)+"_3NF.db");
         
-        return "yo";
+        transferDFs(newDfm);
+        
+        List<DF> dfss;
+        ArrayList<DF> dfs;
+                
+        for(String badTable:not3NFTables){
+            dfss = getDFs();
+            dfs = new ArrayList<>();
+            for(DF d:dfss){
+                if(d.getTableName().equals(badTable))
+                    dfs.add(d);
+            }
+            createTables(newDfm,badTable,dfs);
+        }
+        
+        return "solut";
+    }
+    
+    public void transferDFs(DFManager newDFM) throws SQLException{
+        List<DF> dfs = getDFs();
+        //insertDF("table",Object... values)
     }
     
     /**
-     * Create a table of each DF + one for a key if this is necessery (based on one other table, for 3NF decomposition purpose)
+     * Create a tables for the dfManager newDfm for the  of each DF + one for a key if this is necessery (based on one other table, for 3NF decomposition purpose)
      * Note that the type of all the attributes will be text (SQLite doesn't really care about the type of his attributes anyway...)
      * @param table
      * @param dfs
      * @return
      */
-    public String createTables(String table, List<DF> dfs) throws Exception{
+    public String createTables(DFManager newDFM, String table, List<DF> dfs) throws Exception{
         String[] a1;
         String[] a;
         String[] b;
@@ -483,12 +509,12 @@ public class DFManager {
                 c[k]=k;
             }
             tablename=table+String.valueOf(q);
-            dbm.createNewTable(tablename,a,b,c);
+            newDFM.dbm.createNewTable(tablename,a,b,c); 
             tablesCreated.add(a);
             
             //ID concerned
             vals = new ArrayList(Arrays.asList(a));
-            idConcerned=dbm.getIdConcerned(table,vals);
+            idConcerned=dbm.getIdConcerned(table,vals); 
             
             String attributes="";
             for(int bv=0;bv<a.length;bv++){
@@ -505,12 +531,12 @@ public class DFManager {
                 Object[] tabObjs = new Object[arObjs.size()];
                 for(int w=0;w<arObjs.size();w++)
                     tabObjs[w]=arObjs.get(w);
-                dbm.insertData(tablename, attributes , tabObjs);
+                newDFM.dbm.insertData(tablename, attributes , tabObjs); 
             }
         }   
         
         //Create a table based on a key if this is necessery 
-        key=getKeys(table).get(0);
+        key=getKeys(table).get(0); 
         if(isIncluded(key.getAttributes(),tablesCreated) == -1){
             tablename=table+String.valueOf(dfs.size());
             a=new String[key.getAttributes().size()];
@@ -525,12 +551,12 @@ public class DFManager {
             for(int x=0;x<a.length;x++){
                 c[x]=x;
             }
-            dbm.createNewTable(tablename,a,b,c);
+            newDFM.dbm.createNewTable(tablename,a,b,c); 
             
             //And now adding the tuples. A bit of copy paste from the frist part still.. 
             //Code could be more beautifull, with some more methods
             vals = new ArrayList(Arrays.asList(a));
-            idConcerned=dbm.getIdConcerned(table,vals);
+            idConcerned=dbm.getIdConcerned(table,vals); 
             
             String attributes="";
             for(int bv=0;bv<a.length;bv++){
@@ -547,7 +573,7 @@ public class DFManager {
                 Object[] tabObjs = new Object[arObjs.size()];
                 for(int w=0;w<arObjs.size();w++)
                     tabObjs[w]=arObjs.get(w);
-                dbm.insertData(tablename, attributes , tabObjs);
+                newDFM.dbm.insertData(tablename, attributes , tabObjs); 
             }
             
         }
@@ -671,7 +697,8 @@ public class DFManager {
         //dfm.dbc.printTable("bananes");
         System.out.println("");
           
-        dfm.decompose3NF("warehouse");
+        //dfm.decompose3NF("warehouse");
+        dfm.decompose3NF();
         
         /*
         ArrayList<String> ad=new ArrayList<>();
