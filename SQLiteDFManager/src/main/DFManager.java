@@ -449,6 +449,7 @@ public class DFManager {
             return "nothing to do here";
         }
         
+        okTables.remove("FuncDep");
         DFManager newDfm=new DFManager(""+dbm.getName().substring(0,dbm.getName().length()-3)+"_3NF.db");
         
         transferDFs(newDfm);
@@ -466,7 +467,12 @@ public class DFManager {
             createTables(newDfm,badTable,dfs);
         }
         
-        return "solut";
+        for(String goodTable:okTables){
+            dbm.duplicateTable(newDfm.dbm,goodTable);
+        }
+        dbm.transferTable(newDfm.dbm,okTables);
+        
+        return newDfm.dbm.getName();
     }
     
     public void transferDFs(DFManager newDFM) throws SQLException{
@@ -700,9 +706,10 @@ public class DFManager {
         System.out.println("");
           
         //dfm.decompose3NF("warehouse");
-            //dfm.decompose3NF();
-        DFManager dfm2 = new DFManager("test_3NF.db");
-        dfm.dbm.transferTable(dfm2.dbm,"yo");
+        dfm.decompose3NF();
+        
+        //DFManager dfm2 = new DFManager("test_3NF.db");
+        //dfm.dbm.transferTable(dfm2.dbm,"TheNewTab");
         
         /*
         ArrayList<String> ad=new ArrayList<>();

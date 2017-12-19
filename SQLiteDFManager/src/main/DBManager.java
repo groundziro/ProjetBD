@@ -106,7 +106,26 @@ public class DBManager {
         }
         sqlStm=sqlStm+" PRIMARY KEY(";
         for(int i=0;i<prKeyRefs.length;i++){
-            sqlStm=sqlStm+atrNames[i]+",";
+            sqlStm=sqlStm+atrNames[prKeyRefs[i]]+",";
+        }
+        sqlStm=sqlStm.substring(0,sqlStm.length()-1);
+        sqlStm=sqlStm+")\n";
+        sqlStm=sqlStm+");";
+        //System.out.println(sqlStm);
+        executeStatement(sqlStm);
+    }
+    
+    public void createNewTable(String name, String[] atrNames, String[] classes, String[] prKeyNames) throws Exception{
+        if(atrNames.length != classes.length){
+            throw new Exception("atrNames and classes should have the same size");
+        }
+        String sqlStm="CREATE TABLE IF NOT EXISTS "+name+"(\n";
+        for(int i=0;i<atrNames.length;i++){
+            sqlStm=sqlStm+" "+atrNames[i]+" "+classes[i]+",\n";
+        }
+        sqlStm=sqlStm+" PRIMARY KEY(";
+        for(int i=0;i<prKeyNames.length;i++){
+            sqlStm=sqlStm+prKeyNames[i]+",";
         }
         sqlStm=sqlStm.substring(0,sqlStm.length()-1);
         sqlStm=sqlStm+")\n";
@@ -160,12 +179,75 @@ public class DBManager {
         }
     }
     
-    public void transferTable(DBManager otherDBM, String name){
-        String sqlStm="ATTACH DATABASE '"+otherDBM+"' AS other;\n" +
-                        "\n" +
-                        "INSERT INTO other.FuncDep\n" +
-                        "SELECT * FROM main.FuncDep";
-        executeStatement(sqlStm);
+    /*
+    public void transferTable(DBManager otherDBM, String tabName) throws SQLException{
+        String attributes="";
+        for(String atrb:getColNames(tabName)){
+            attributes=attributes+atrb+",";
+        }
+        attributes=attributes.substring(0,attributes.length()-1);
+        
+        
+        ResultSet rs = getTableDatas(tabName);
+        while(rs.next()){
+            for(int i=0;i<getColNames(tabName).size();i++){
+                  
+            }
+            insertData(tabName,attributes, Object... values)
+        }
+        
+    }
+    */
+    
+    public void duplicateTable(DBManager otherDBM, String tabName) throws SQLException, Exception{
+        String[] a = new String[getColNames(tabName).size()];
+        for(int i=0;i<getColNames(tabName).size();i++){
+            a[i]=getColNames(tabName).get(i);
+        }
+        String[] b = new String[a.length];
+        for(int i=0;i<a.length;i++){
+            b[i]="text";
+        }
+        ArrayList<String> pkNAME = new ArrayList<>();
+        ResultSet rs=getPM(tabName);
+        while(rs.next()){
+            pkNAME.add(rs.getString("COLUMN_NAME"));
+        }
+        String[] pkName=new String[pkNAME.size()];
+        for(int i=0;i<pkNAME.size();i++){
+            pkName[i]=pkNAME.get(i);
+        }
+        
+        otherDBM.createNewTable(tabName,a, b,pkName);
+    }
+    
+    public void transferTable(DBManager otherDBM, List<String> tabNames) throws SQLException, Exception{
+        
+        String nameother=otherDBM.getName();
+        otherDBM.conn.close();
+        for(String tabName:tabNames){
+            String sqlStm="attach database '"+nameother+"' as contact;";
+            executeStatement(sqlStm);
+            sqlStm="INSERT INTO contact."+tabName+" SELECT * FROM "+tabName+";";
+            executeStatement(sqlStm);
+            //otherDBM.connect(nameother);  
+           // otherDBM.printTable(tabName);
+        }
+    }
+    
+    public void printPM(String table) throws SQLException{
+        DatabaseMetaData meta = conn.getMetaData();
+        ResultSet rs = meta.getPrimaryKeys(null, null, table);
+        while (rs.next()) {
+        String columnName = rs.getString("COLUMN_NAME");
+         System.out.println("getPrimaryKeys(): columnName=" + columnName);
+        }
+    }
+    
+    public ResultSet getPM(String table) throws SQLException{
+        DatabaseMetaData meta = conn.getMetaData();
+        ResultSet rs = meta.getPrimaryKeys(null, null, table);
+        return rs;
     }
     
     
