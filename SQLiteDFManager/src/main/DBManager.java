@@ -150,7 +150,7 @@ public class DBManager {
         }
         catch(SQLException e){
             //System.out.println(e.getMessage());
-            //Ignored because 3NF decomposition could volontary generate data not respecting unique priv key
+               //Ignored because 3NF decomposition could volontary generate data not respecting unique priv key
         }
     }
     

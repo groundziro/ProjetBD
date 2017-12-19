@@ -449,7 +449,7 @@ public class DFManager {
     }
     
     /**
-     * Create a table of each DF (for 3NF decomposition purpose)
+     * Create a table of each DF + one for a key if this is necessery (based on one other table, for 3NF decomposition purpose)
      * Note that the type of all the attributes will be text (SQLite doesn't really care about the type of his attributes anyway...)
      * @param table
      * @param dfs
@@ -461,7 +461,9 @@ public class DFManager {
         String[] b;
         Integer[] c;
         ArrayList<Integer> idConcerned;
+        Key key;
         ResultSet tuples;
+        ArrayList<String[]> tablesCreated=new ArrayList<>();
         ArrayList<String> vals;
         ArrayList<Object> arObjs;
         String tablename;
@@ -482,6 +484,7 @@ public class DFManager {
             }
             tablename=table+String.valueOf(q);
             dbm.createNewTable(tablename,a,b,c);
+            tablesCreated.add(a);
             
             //ID concerned
             vals = new ArrayList(Arrays.asList(a));
@@ -495,7 +498,7 @@ public class DFManager {
             
             tuples = dbm.getTableDatas(table); 
             while(tuples.next()){
-                arObjs=new ArrayList<Object>();
+                arObjs=new ArrayList<>();
                 for(Integer in:idConcerned){
                     arObjs.add(tuples.getObject(in+1));
                 }
@@ -504,8 +507,78 @@ public class DFManager {
                     tabObjs[w]=arObjs.get(w);
                 dbm.insertData(tablename, attributes , tabObjs);
             }
+        }   
+        
+        //Create a table based on a key if this is necessery 
+        key=getKeys(table).get(0);
+        if(isIncluded(key.getAttributes(),tablesCreated) != -1){
+            tablename=table+String.valueOf(dfs.size());
+            a=new String[key.getAttributes().size()];
+            for(int x=0;x<key.getAttributes().size();x++){
+                a[x]=key.getAttributes().get(x);
+            }
+            b=new String[a.length];
+            for(int x=0;x<a.length;x++){
+                b[x]="text";
+            }
+            c=new Integer[a.length];
+            for(int x=0;x<a.length;x++){
+                c[x]=x;
+            }
+            dbm.createNewTable(tablename,a,b,c);
+            
+            //And now adding the tuples. A bit of copy paste from the frist part still.. 
+            //Code could be more beautifull, with some more methods
+            vals = new ArrayList(Arrays.asList(a));
+            idConcerned=dbm.getIdConcerned(table,vals);
+            
+            String attributes="";
+            for(int bv=0;bv<a.length;bv++){
+                attributes=attributes+a[bv]+",";
+            }
+            attributes=attributes.substring(0, attributes.length()-1);
+            
+            tuples = dbm.getTableDatas(table); 
+            while(tuples.next()){
+                arObjs=new ArrayList<>();
+                for(Integer in:idConcerned){
+                    arObjs.add(tuples.getObject(in+1));
+                }
+                Object[] tabObjs = new Object[arObjs.size()];
+                for(int w=0;w<arObjs.size();w++)
+                    tabObjs[w]=arObjs.get(w);
+                dbm.insertData(tablename, attributes , tabObjs);
+            }
+            
         }
+            
+        
         return "tables "+table+"[0-"+String.valueOf(dfs.size())+"] created";
+    }
+    
+    /**
+     * Return the id of one includers if the included is indeed included in it.
+     * Return -1 if no includers include the included
+     * @param included
+     * @param includers
+     * @return
+     */
+    public static int isIncluded(List<String> included, ArrayList<String[]> includers){
+        ArrayList<String> includer;
+        boolean ok;
+        for(int i=0;i<includers.size();i++){
+            ok=true;
+            includer=new ArrayList(Arrays.asList(includers.get(i)));
+            for(String str:included){
+                if(!includer.contains(str)){
+                    ok=false;
+                    break;
+                }
+            }
+            if(ok)
+                return i;
+        }
+        return -1;
     }
             
     
