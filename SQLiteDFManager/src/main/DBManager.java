@@ -161,9 +161,10 @@ public class DBManager {
     }
     
     public void transferTable(DBManager otherDBM, String name){
-        String sqlStm="attach database '"+otherDBM.getName()+"' as otherdb;";
-        executeStatement(sqlStm);
-        sqlStm="INSERT INTO otherdb.FuncDep SELECT * FROM FuncDep;";
+        String sqlStm="ATTACH DATABASE '"+otherDBM+"' AS other;\n" +
+                        "\n" +
+                        "INSERT INTO other.FuncDep\n" +
+                        "SELECT * FROM main.FuncDep";
         executeStatement(sqlStm);
     }
     
