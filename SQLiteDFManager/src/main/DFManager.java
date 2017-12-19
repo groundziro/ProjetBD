@@ -702,7 +702,7 @@ public class DFManager {
         //dfm.decompose3NF("warehouse");
             //dfm.decompose3NF();
         DFManager dfm2 = new DFManager("test_3NF.db");
-        dfm.dbm.transferTable(dfm2.dbm);
+        dfm.dbm.transferTable(dfm2.dbm,"yo");
         
         /*
         ArrayList<String> ad=new ArrayList<>();
