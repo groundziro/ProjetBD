@@ -277,7 +277,31 @@ public class DFManager {
         }
         return false;
     }
+     public ArrayList<String> closure(ArrayList<String> X, ArrayList<DF> F){
+        ArrayList<String> oldDep = new ArrayList<>();
+        ArrayList<String> newDep = X;
+        while(!newDep.containsAll(oldDep)){
+            oldDep = newDep;
+            for(DF df:F){
+                boolean in = true;
+                for(String w : decomposeLhs(df)){
+                    if(!newDep.contains(w))
+                        in = false;
+                }
+                if(in&&!newDep.contains(df.getRhs())){
+                    newDep.add(df.getRhs());
+                }
+            }
+        }
+        return newDep;
+    }
     
+    public boolean member(ArrayList<DF> F, DF df){
+        ArrayList<String> lhs = new ArrayList<>();
+        for(String s : decomposeLhs(df))
+            lhs.add(s);
+        return closure(lhs,F).contains(df.getRhs());
+    }
     /**
      * If we got the attributes in "whatWeGot",then, with the DFs "dfs", we also got the returned attributes
      * @param whatWeGot
