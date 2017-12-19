@@ -160,10 +160,15 @@ public class DBManager {
         }
     }
     
+    public void transferTable(DBManager otherDBM){
+        String sqlStm="attach database '"+otherDBM.getName()+"' as otherdb;";
+        executeStatement(sqlStm);
+    }
     
     
-    public void insertDF(String attributes,Object... values){
-        insertData("FuncDep",attributes,values);
+    
+    public void insertDF(Object... values){
+        insertData("FuncDep","tableName,lhs,rhs",values);
     }
     
     /**
