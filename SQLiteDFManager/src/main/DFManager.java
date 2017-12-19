@@ -511,7 +511,7 @@ public class DFManager {
         
         //Create a table based on a key if this is necessery 
         key=getKeys(table).get(0);
-        if(isIncluded(key.getAttributes(),tablesCreated) != -1){
+        if(isIncluded(key.getAttributes(),tablesCreated) == -1){
             tablename=table+String.valueOf(dfs.size());
             a=new String[key.getAttributes().size()];
             for(int x=0;x<key.getAttributes().size();x++){
