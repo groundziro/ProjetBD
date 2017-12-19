@@ -293,7 +293,8 @@ public class Interface extends Application {
                                 }
                             });
                         });
-                        //check3NF(b.getText());
+                        newChoice.setCenter(new HBox(BCNF,NF));
+                        primaryStage.setScene(new Scene(newChoice));
                     });
                     v.getChildren().add(b);
                 }
@@ -510,7 +511,11 @@ public class Interface extends Application {
            Alert alert = new Alert(AlertType.CONFIRMATION,"This table isn't in 3NF. Do you want a decomposition?");
            alert.showAndWait().ifPresent(cnsmr->{
                if(cnsmr==ButtonType.OK)
-                   System.out.println("Decomposition in progress...");
+                   try {
+                       dfs.decompose3NF();
+               } catch (Exception ex) {
+                   Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
+               }
            });
        }
     } 
