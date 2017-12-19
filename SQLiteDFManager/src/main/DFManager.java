@@ -701,32 +701,10 @@ public class DFManager {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws SQLException, Exception {
-        DFManager dfm = new DFManager("test.db");
-        //dfm.dbc.printTable("bananes");
-        System.out.println("");
-          
-        //dfm.decompose3NF("warehouse");
-        dfm.decompose3NF();
+       // DFManager dfm = new DFManager("test.db");
         
-        //DFManager dfm2 = new DFManager("test_3NF.db");
-        //dfm.dbm.transferTable(dfm2.dbm,"TheNewTab");
+       // dfm.decompose3NF();
         
-        /*
-        ArrayList<String> ad=new ArrayList<>();
-        ad.add("name");
-        ad.add("capacity");
-        ad.add("id");
-        System.out.println(dfm.dbm.getIdConcerned("warehouse", ad));
-        */
-        
-        /*
-        ArrayList<Key> kk= dfm.getKeys("alpha");
-        System.out.println("-------------------");
-        for(Key k:kk){
-            System.out.println(k);
-        }
-        */
-         
         System.out.println();
     }
     
