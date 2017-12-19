@@ -174,11 +174,24 @@ public class DBManager {
         return result;
     }
     
+    public static String parsToStr(Object o){
+        String result;
+        try{
+            result=(String) o;
+        }
+        catch(Exception e){  //Only Integers can't be casted to String in the SQLite supported types
+            result=String.valueOf(o);
+        }
+        return result;
+    }
+    
     public List<DF> getDFs() throws SQLException{
         ResultSet rs = getTableDatas("FuncDep");
         ArrayList<DF> dfResult=new ArrayList<>();
         while(rs.next()){
-            dfResult.add(new DF((String)rs.getObject(1),(String)rs.getObject(2),(String)rs.getObject(3)));
+            //dfResult.add(new DF((String)rs.getObject(1),(String)rs.getObject(2),(String)rs.getObject(3)));
+            //dfResult.add(new DF(String.valueOf(rs.getObject(1)),String.valueOf(rs.getObject(2)),String.valueOf(rs.getObject(3))));
+            dfResult.add(new DF(parsToStr(rs.getObject(1)),parsToStr(rs.getObject(2)),parsToStr(rs.getObject(3))));
             //System.out.println(""+rs.getObject(1)+":"+rs.getObject(2)+"->"+rs.getObject(3));
         }
         return dfResult;
@@ -274,113 +287,7 @@ public class DBManager {
 
     
 
-     /*
-    public void deleteData(String table, String attributes, int id, Object... values){
-        String sqlcmd="DELETE FROM table1 WHERE id = ?";
-        try{
-            Connection conn=connect("bob.db");
-            PreparedStatement pstmt=conn.prepareStatement(sqlcmd);
-            pstmt.setInt(1,id);
-            pstmt.executeUpdate();
-        }
-        catch(SQLException e){
-            System.out.println(e.getMessage());
-        }
-    }
-    */
-    
-    /*  
-    public static void main(String[] args) {
-        connect();
-    }
-    
 
-    
-    
-    public static void createNewTable(){
-        String target="jdbc:sqlite:bob.db";
-        String tablecraft="CREATE TABLE IF NOT EXISTS table1 (\n"+
-                          "id integer PRIMARY KEY,\n"+
-                          "name text NOT NULL,\n"+
-                          "capacity real\n"+
-                          ");";
-        try{
-            Connection conn=DriverManager.getConnection(target);
-            Statement stmt=conn.createStatement();
-            stmt.execute(tablecraft);
-        }
-        catch(SQLException e){
-            System.out.println(e.getMessage());
-        }
-    }
-    
-      public void createNewDB(String name){
-        String target="jdbc:sqlite:"+name;
-        try{
-            Connection conn=DriverManager.getConnection(target);
-            if(conn!=null){
-                DatabaseMetaData meta = conn.getMetaData();
-                //System.out.println("Driver name: "+meta.getDriverName());
-                System.out.println("db created");
-            }
-        }
-        catch(SQLException e){
-            System.out.println(e.getMessage());
-        }
-    }
-    
-     public void insertData(String table, String name, double capacity){
-        String sqlcmd="INSERT INTO "+table+"(name,capacity) VALUES(?,?)";
-        try{
-            PreparedStatement pstmt=conn.prepareStatement(sqlcmd);
-            pstmt.setString(1,name);
-            pstmt.setDouble(2,capacity);
-            pstmt.executeUpdate();
-        }
-        catch(SQLException e){
-            System.out.println(e.getMessage());
-        }
-    }
-    
-    
-     public void printTable(String table){
-        String sqlStm="SELECT * FROM "+table;
-        try{
-            List cn = getColNames(table);
-            for(int i=0;i<cn.size();i++){
-                System.out.print(cn.get(i)+"\t");
-            }
-            System.out.println("\n---------------------");
-            Statement stmt=conn.createStatement();
-            ResultSet rs=stmt.executeQuery(sqlStm);
-            String format = "%-12s%-24s%-36s%n";
-            while(rs.next()){
-                System.out.printf(format,rs.getObject("id"),rs.getObject("name"),rs.getObject("capacity"));
-            }
-        }
-        catch(SQLException e){
-            System.out.println(e.getMessage());
-        }
-    }
-    
-    
-        public void check(){
-        String sqlcmd="SELECT id,name,capacity FROM warehouse";
-        try{
-            Statement stmt=conn.createStatement();
-            ResultSet rs=stmt.executeQuery(sqlcmd);
-            while(rs.next()){
-                System.out.println(rs.getObject("id")+"\t"+
-                                   rs.getObject("name")+"\t"+
-                                   rs.getObject("capacity"));
-               
-            }
-        }
-        catch(SQLException e){
-            System.out.println(e.getMessage());
-        }
-    }
-    */
 
    
     

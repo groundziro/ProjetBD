@@ -32,24 +32,69 @@ public class DFManager {
     ArrayList<Key> getSuperKeys(String table) throws SQLException{
         ArrayList<Key> toReturn = new ArrayList<>();
         toReturn.addAll(getKeys(table));
-        boolean added = false;
+        List<String> attributes = getColNames(table);
+        ArrayList<String> atrbNotInKey;
+        ArrayList<String> atrbInKey;
+        ArrayList<Key> bag;
+        Key tmpk;
+        boolean added;
+        boolean inThere; 
+        boolean isThisOne;
+        
+        
         do{
+            bag=new ArrayList<>();
             added = false;
             for(Key k : toReturn){
-                for(String attribute : getColNames(table)){
-                    if(!k.attributes.contains(attribute)){
-                        Key newKey = k;
-                        newKey.addAttributes(attribute);
-                        if(!toReturn.contains(newKey)){
-                            added = true;
-                            toReturn.add(newKey);
+                atrbInKey = new ArrayList<>();
+                atrbNotInKey = new ArrayList<>();
+                
+                for(String ls : k.getAttributes()){
+                    atrbInKey.add(ls);
+                }
+                
+                for(String str:attributes){
+                    if(! atrbInKey.contains(str)){
+                        atrbNotInKey.add(str);
+                    }
+                }
+                
+                
+                for(String l:atrbNotInKey){
+                    tmpk=new Key(false);
+                    for(String at:atrbInKey){
+                        tmpk.addAttributes(at);
+                    }
+                    tmpk.addAttributes(l);
+                    bag.add(tmpk);
+                }
+                                               
+            }
+            
+            for(Key kbag:bag){
+                inThere=false;
+                for(Key ky:toReturn){
+                    isThisOne=true;
+                    for(String atrb:kbag.getAttributes()){
+                        if(! ky.getAttributes().contains(atrb)){
+                           isThisOne=false;
+                           break;
                         }
                     }
-                }                
+                    if(isThisOne){
+                        inThere=true;
+                    }
+                }
+                
+                if(! inThere){
+                    toReturn.add(kbag);
+                    added=true;
+                }
             }
         }while(added);
         return toReturn;
     }
+    
     /**
      * Given a table, return all the keys of the table
      * @param table
@@ -57,7 +102,7 @@ public class DFManager {
      * @throws SQLException
      */
     public ArrayList<Key> getKeys(String table) throws SQLException{
-        List<String> atribNames = dbm.getColNames(table);
+        List<String> atribNames = getColNames(table);
         List<DF> dfss = getDFs();
         ArrayList<DF> dfs = new ArrayList<>();
         for(DF d:dfss){
@@ -69,11 +114,13 @@ public class DFManager {
             tt[i]=false;
         }
         for(int i=0;i<atribNames.size();i++){
+            
             for(DF curDf:dfs){
                 if(curDf.getRhs().equals(atribNames.get(i))){
                     tt[i]=true;
                 }
             }
+            
         }
         ArrayList<String> alrInKey=new ArrayList<>();
         for(int i=0;i<tt.length;i++){
@@ -118,27 +165,9 @@ public class DFManager {
                 newAlrInKey=new ArrayList<>();
                 newAlrInKey.addAll(alrInKey);
                 newAlrInKey.add(rem);
-                
-                //boolean newz;
+
                 newAlrHenced=findConsc(newAlrInKey,dfs);
-               
-                //THIS PART SHOULD ACTUALLY GO TRROUGH ONCE SINCE findConsc ALREADY RETURN THE CONSC OF THE 
-                /*
-                editedNewAlrHenced=findConsc(newAlrHenced,dfs);
-                do{
-                    newz=false;
-                    for(String str:editedNewAlrHenced){
-                        if(! newAlrHenced.contains(str)){
-                            newAlrHenced.add(str);
-                            newz=true;
-                        }                            
-                    }
-                    newAlrHenced.addAll(editedNewAlrHenced);
-                    editedNewAlrHenced=findConsc(newAlrHenced,dfs);
-                //}while(! newAlrHenced.containsAll(editedNewAlrHenced)); 
-                }while(newz);     //while we got more henced with the new henced
-                */
-                //END OF 'THIS PART'
+                          
                 subbag=recursGetKeys(bag,attributes,newAlrInKey,alrHenced, dfs);
                 for(Key k:subbag){
                     if(! bag.contains(k))
@@ -148,28 +177,83 @@ public class DFManager {
             return bag;
         }
     }
+    
     public boolean is3NF(String table) throws SQLException{
-        boolean nf = true;
-        List<DF> dfs = getDFs();
-        for(DF df : dfs){
-            for(Key k : getKeys(table))
-                nf&=k.getAttributes().contains(df.getRhs());
+        List<DF> dfss = getDFs();
+        ArrayList<DF> dfs = new ArrayList<>();
+        for(DF d:dfss){
+            if(d.getTableName().equals(table))
+                dfs.add(d);
         }
-        return (nf||isBCNF(table));
+        
+        List<Key> keys=getKeys(table);
+        
+        String[] lhs;
+        String rh;
+        
+        for(DF df : dfs){
+            lhs=df.getLhs().split(" ");
+            rh=df.getRhs();
+            if(!isOneOfTheKey(lhs,keys)){
+                if(! isPrm(rh,keys)){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
     
+    
     public boolean isBCNF(String table) throws SQLException{
-        List<DF> dfs = getDFs();
-        boolean bcnf = true;
-        for(DF df : dfs){
-            List<DF> func = new ArrayList<>();
-            func.add(df);
-            ArrayList<String> attr = new ArrayList<>();
-            attr.addAll(Arrays.asList(decomposeLhs(df)));
-            bcnf&=findConsc(attr,func).containsAll(getColNames(table));           
+        List<DF> dfss = getDFs();
+        ArrayList<DF> dfs = new ArrayList<>();
+        for(DF d:dfss){
+            if(d.getTableName().equals(table))
+                dfs.add(d);
         }
-        return bcnf;
+        
+        List<Key> keys=getKeys(table);
+        
+        String[] lhs;
+        
+        for(DF df : dfs){
+            lhs=df.getLhs().split(" ");
+            if(!isOneOfTheKey(lhs,keys)){
+                return false;
+            }
+        }
+        return true;
     }
+    
+    public static boolean isPrm(String atr, List<Key> keys){
+        for(Key k:keys){
+            if(k.getAttributes().contains(atr))
+                return true;
+        }
+        return false;
+    }
+    
+    public static boolean isOneOfTheKey(String[] atrb, List<Key> keys){
+        boolean isThisOne;
+        ArrayList<String> atrbArray=new ArrayList<>();
+        for(String a:atrb){
+            atrbArray.add(a);
+        }
+        for(Key k:keys){
+            isThisOne=true;
+            for(String atr:k.getAttributes()){
+                if(! atrbArray.contains(atr) ){
+                    isThisOne=false;
+                    break;
+                }
+            }
+            if(isThisOne){
+                return true;
+            }
+        }
+        return false;
+    }
+    
     /**
      * If we got the attributes in "whatWeGot",then, with the DFs "dfs", we also got the returned attributes
      * @param whatWeGot
@@ -379,7 +463,6 @@ public class DFManager {
     }
    
     
-    //BROUILLON
     public void deleteOneConflictedData(DFConflict intru, int id){
         String[] cut=intru.getLhconfl().split(",");
         Object[] values=new Object[cut.length+1];
@@ -410,11 +493,16 @@ public class DFManager {
         //dfm.dbc.printTable("bananes");
         System.out.println("");
         
-        ArrayList<Key> kk= dfm.getKeys("alpha");
+        
+        ArrayList<Key> kk= dfm.getKeys("bananes");
         System.out.println("-------------------");
         for(Key k:kk){
             System.out.println(k);
         }
+        
+        System.out.print(dfm.is3NF("bananes"));
+        
+        
         
         /*
         System.out.println("°°°°°°°°°°°°°°°°°°°°°°°");

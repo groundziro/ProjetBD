@@ -15,12 +15,17 @@ public class Key {
     ArrayList<String> attributes;
     boolean isMinimal;
 
+    public void setAttributes(ArrayList<String> attributes) {
+        this.attributes = attributes;
+    }
+
     public Key() {
         attributes=new ArrayList();
         isMinimal=true;
     }
     
     public Key(boolean b){
+        attributes=new ArrayList();
         isMinimal=b;
     }
 
