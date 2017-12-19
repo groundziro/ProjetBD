@@ -73,7 +73,7 @@ public class Interface extends Application {
             }
             try {
                 if(!dfs.checkConflict().isEmpty()){
-                    Alert alert = new Alert(AlertType.INFORMATION, "There's conflicts in your DB.\nLet's reolve them.");
+                    Alert alert = new Alert(AlertType.INFORMATION, "There's conflicts in your DB.\nLet's resolve them.");
                     alert.showAndWait().ifPresent(cnsmr->{
                         try {
                             conflicts(primaryStage);
@@ -488,7 +488,7 @@ public class Interface extends Application {
         }
     }
     private void modify(String df,String lhs,String rhs)throws SQLException{
-        dfs.getDB().insertData("FuncDep", dfs.getColNames("FuncDep").get(0)+"lhs,rhs", getDF(df).getTableName(),lhs,rhs);
+        dfs.getDB().insertData("FuncDep", dfs.getColNames("FuncDep").get(0)+",lhs,rhs", getDF(df).getTableName(),lhs,rhs);
         delete(df);
     }
     private void delete(String df)throws SQLException{
