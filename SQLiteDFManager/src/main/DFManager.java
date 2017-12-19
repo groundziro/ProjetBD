@@ -29,7 +29,7 @@ public class DFManager {
     }   
     
     
-    ArrayList<Key> getSuperKeys(String table) throws SQLException{
+    public ArrayList<Key> getSuperKeys(String table) throws SQLException{
         ArrayList<Key> toReturn = new ArrayList<>();
         toReturn.addAll(getKeys(table));
         List<String> attributes = getColNames(table);
@@ -282,7 +282,7 @@ public class DFManager {
         ArrayList<String> newDep = new ArrayList<>();
         newDep.addAll(X);
         while(!newDep.containsAll(oldDep)){
-            oldDep = newDep;
+            oldDep.addAll(newDep);
             for(DF df:F){
                 boolean in = true;
                 for(String w : decomposeLhs(df)){
@@ -297,26 +297,24 @@ public class DFManager {
         return newDep;
     }
     
-    public ArrayList<DF> getRedundants(ArrayList<DF> F){
-        ArrayList<DF> redundants = new ArrayList<>();
-        ArrayList<DF> G = new ArrayList<>();
-        G.addAll(F);
-        for(DF df: F){
+    public ArrayList<DF> nonRedun(List<DF> G){
+        ArrayList<DF> F = new ArrayList<>();
+        F.addAll(G);
+        for(DF df: G){
             ArrayList<DF> newF = new ArrayList<>();
             newF.addAll(G);
             newF.remove(df);
             if(member(newF,df)){
-                redundants.add(df);
+                F=newF;
             }
-            G=newF;
         }
-        return redundants;
+        return F;
     } 
     public boolean member(ArrayList<DF> F, DF df){
         ArrayList<String> lhs = new ArrayList<>();
         for(String s : decomposeLhs(df))
             lhs.add(s);
-        return closure(lhs,F).contains(df.getRhs());
+        return findConsc(lhs,F).contains(df.getRhs());
     }
     /**
      * If we got the attributes in "whatWeGot",then, with the DFs "dfs", we also got the returned attributes
@@ -393,6 +391,7 @@ public class DFManager {
         List<DF> dfs = getDFs();
         List<String> cols;
         ResultSet tableData;
+        ArrayList<DF> reducted = nonRedun(dfs);
         int[] rhcol;
         int lhcol;
         boolean ok;
@@ -406,7 +405,10 @@ public class DFManager {
                     ok=true;
                 }
             }
-            if(!ok){
+            if(!reducted.contains(curDF)){
+                conflicts.add(new DFConflict(curDF,4,"This FD is redundant"));
+            }
+            else if(!ok){
                 conflicts.add(new DFConflict(curDF,3,"No such table: '"+curDF.getTableName()+"'"));
             }
             else{

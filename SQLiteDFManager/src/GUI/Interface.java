@@ -114,7 +114,8 @@ public class Interface extends Application {
             Button Modify = new Button("Modify...");
             Button Delete = new Button("Delete...");
             Button Return = new Button("Return");
-            p.setBottom(new HBox(Add,Exit,Check,Modify,Delete));
+            Button SuperKeys = new Button("SuperKeys");
+            p.setBottom(new HBox(Add,Exit,Check,Modify,Delete,SuperKeys));
             try{
                 p.setCenter(current(dfs));
             }catch(SQLException e){
@@ -131,7 +132,7 @@ public class Interface extends Application {
                 }catch(SQLException e){
                     System.out.println(e.getMessage());
                 }
-                newP.setBottom(new HBox(Add,Exit,Check,Modify,Delete));
+                newP.setBottom(new HBox(Add,Exit,Check,Modify,Delete,SuperKeys));
                 Scene newTables = new Scene(newP);
                 primaryStage.setScene(newTables);
             });
@@ -292,6 +293,17 @@ public class Interface extends Application {
                         newChoice.setCenter(new HBox(BCNF,NF));
                         primaryStage.setScene(new Scene(newChoice));
             });
+            SuperKeys.setOnAction(superK->{
+                Alert alert = new Alert(AlertType.CONFIRMATION,"Do you want to show the super keys of the database?");
+                alert.showAndWait().ifPresent(cnsmr->{
+                    try {
+                        Text superKeys = currentSuperKeys();
+                        p.setRight(superKeys);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                });
+            });
             Check.setDefaultButton(true);
             primaryStage.setScene(Tables);
     }
@@ -422,6 +434,20 @@ public class Interface extends Application {
                 return conflict;
         }
         return null;
+    }
+    private Text currentSuperKeys() throws SQLException{
+        Text txt = new Text();
+        String str="";
+        ArrayList<ArrayList<DF>> array = DFManager.orderDFList(dfs.getDFs());
+        for(ArrayList<DF> table : array){
+            str+= table.get(0).getTableName()+":\n";
+            str+="SuperKeys :\n";
+            for(Key k : dfs.getSuperKeys(table.get(0).getTableName())){
+                str+="\t"+k.toString()+"\n";
+            }
+        }
+        txt.setText(str);
+        return txt;
     }
     private Text current(DFManager df) throws SQLException{
         if(df.getDFs().isEmpty())
