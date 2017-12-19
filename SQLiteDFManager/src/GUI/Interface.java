@@ -479,7 +479,7 @@ public class Interface extends Application {
                     return;
                 }
             }
-            dfs.getDB().insertDF("table1,lhs,rhs", df.getTableName(),df.getLhs(),df.getRhs());
+            dfs.getDB().insertDF(df.getTableName(),df.getLhs(),df.getRhs());
         }
     }
     private void modify(String df,String lhs,String rhs)throws SQLException{
