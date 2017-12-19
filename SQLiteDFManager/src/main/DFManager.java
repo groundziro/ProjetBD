@@ -46,7 +46,6 @@ public class DFManager {
             bag=new ArrayList<>();
             added = false;
             for(Key k : toReturn){
-<<<<<<< HEAD
                 atrbInKey = new ArrayList<>();
                 atrbNotInKey = new ArrayList<>();
                 
@@ -80,16 +79,7 @@ public class DFManager {
                         if(! ky.getAttributes().contains(atrb)){
                            isThisOne=false;
                            break;
-=======
-                for(String attribute : getColNames(table)){
-                    if(!k.attributes.contains(attribute)){
-                        Key newKey = k;
-                        newKey.setIsMinimal(false);
-                        newKey.addAttributes(attribute);
-                        if(!toReturn.contains(newKey)){
-                            added = true;
-                            toReturn.add(newKey);
->>>>>>> e18e883bdf5ec27a1862ebb356deff8ca794db8b
+
                         }
                     }
                     if(isThisOne){
@@ -505,13 +495,15 @@ public class DFManager {
         System.out.println("");
         
         
-        ArrayList<Key> kk= dfm.getKeys("bananes");
+        ArrayList<Key> kk= dfm.getKeys("alpha");
         System.out.println("-------------------");
         for(Key k:kk){
             System.out.println(k);
         }
-        
-        System.out.print(dfm.is3NF("bananes"));
+        System.out.println("zzzzzzzzzzzzzzzzz");
+        for(Key k:dfm.getSuperKeys("alpha")){
+            System.out.println(k.toString());
+        }
         
         
         
