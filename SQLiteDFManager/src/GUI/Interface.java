@@ -57,6 +57,17 @@ public class Interface extends Application {
             p.setPrefSize(300, 300);
             try{
                 dfs = new DFManager(result.getAbsolutePath());
+                if(!dfs.getTabNames().contains("FuncDep")){
+                    Alert alert = new Alert(AlertType.INFORMATION,"This table doesn't have any FDs.\nDo you want to add the FuncDep relation.");
+                    alert.showAndWait().ifPresent(cnsmr->{
+                        if(cnsmr==ButtonType.OK)
+                            try {
+                                dfs.checkFuncDep();
+                        } catch (SQLException ex) {
+                            Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    });
+                }                    
             }catch(SQLException e){
                 System.out.println(e.getMessage());
             }
@@ -421,6 +432,8 @@ public class Interface extends Application {
         return null;
     }
     private Text current(DFManager df) throws SQLException{
+        if(df.getDFs().isEmpty())
+            return new Text("The \"FuncDep\" table is empty, please fill it.");
         Text txt = new Text();
         String str="";
         ArrayList<ArrayList<DF>> array = DFManager.orderDFList(df.getDFs());
@@ -483,7 +496,7 @@ public class Interface extends Application {
         }
     }
     private void modify(String df,String lhs,String rhs)throws SQLException{
-        dfs.getDB().insertData("FuncDep", "table1,lhs,rhs", getDF(df).getTableName(),lhs,rhs);
+        dfs.getDB().insertData("FuncDep", dfs.getColNames("FuncDep").get(0)+"lhs,rhs", getDF(df).getTableName(),lhs,rhs);
         delete(df);
     }
     private void delete(String df)throws SQLException{
