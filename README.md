@@ -17,12 +17,9 @@ If the table doesn't exist an alert appears and you have to change the Table tex
 #EXIT
 It brings you back to the first screen with the browse button.
 #CHECK
-After clicking it, choose the normal form you want to check(3NF or BCNF).
-If the database isn't in BCNF, it'll ask you if you want to check in 3NF.
-If the database isn't in 3NF, it'll ask you if you want to decompose it in another DataBase.
+After clicking it, click the button that represents the table you wanna check.
+It will check if the table is BCNF or 3NF. If it isn't 3NF, you'll have the choice to decompose it in 3NF tables.
 #MODIFY
 After clicking it, fill the text boxes on the bottom of the window BEFORE clicking on the FD you want to modify.
 #DELETE
 After clicking it, click on the FD you wanna remove. It will ask you if wanna continue, click on OK to Delete another FD that you choose with the same method.
-#link
-https://github.com/groundziro/ProjetBD
