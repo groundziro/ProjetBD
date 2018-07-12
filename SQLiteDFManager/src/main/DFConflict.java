@@ -15,7 +15,7 @@ public class DFConflict {
     String message; 
     String lhconfl;
     ArrayList<String> rhconfl;   //in case of case 1, the lhs of the tuples in conflict
-    int type;  //1=two+ tuple, 2=no attribute, 3=no table
+    int type;  //1=two+ tuple, 2=no attribute, 3=no table, 4=redundant DF
     
     public String getLhconfl() {
         return lhconfl;

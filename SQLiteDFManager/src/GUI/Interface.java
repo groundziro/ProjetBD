@@ -478,7 +478,7 @@ public class Interface extends Application {
     private ArrayList<String> getLhs(String lhs){
         ArrayList<String> res = new ArrayList<>();
         String copy = lhs;
-        res.add(copy.substring(0, copy.indexOf(' ')));
+        res.add((copy.contains(" ")?copy.substring(0, copy.indexOf(" ")):copy));
         while(!copy.equals(copy+"")&&!copy.equals(copy+" ")){
             System.out.println(copy);
             copy = copy.substring(copy.indexOf(' '));
