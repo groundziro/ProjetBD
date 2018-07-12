@@ -49,6 +49,7 @@ public class Interface extends Application {
         Browse.setOnAction((ActionEvent actionEvent) -> {
             FileChooser choose = new FileChooser();
             choose.getExtensionFilters().add(new ExtensionFilter("DataBases","*.db"));
+            choose.setInitialDirectory(new File("."));
             File result = choose.showOpenDialog(primaryStage);
             while(result==null){                
                 result = choose.showOpenDialog(primaryStage);
@@ -567,7 +568,6 @@ public class Interface extends Application {
      */
     public static void main(String[] args) {
         Application.launch(args);
-       // System.out.println("ok");
     }
     
 }
