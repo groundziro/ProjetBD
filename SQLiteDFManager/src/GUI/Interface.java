@@ -307,7 +307,8 @@ public class Interface extends Application {
      */
     protected void conflicts(Stage primaryStage) throws SQLException{
         Text instructions = new Text("Click on a button to resolve the conflict induced with the functional dependency");
-        primaryStage.hide();
+        if(primaryStage.isShowing())
+            primaryStage.hide();
         ArrayList<Button> conflictBtns = getConflicts();
         Stage conflictStage = new Stage();
         BorderPane conflict = new BorderPane();
@@ -322,11 +323,11 @@ public class Interface extends Application {
                     if(cnsmr==ButtonType.OK){
                         try{
                             delete(btn.getText());
-                            btn.setVisible(false);
-                            if(dfs.checkConflict().isEmpty()){
+                            if(getConflicts().isEmpty()){
                                 conflictStage.close();
                                 primaryStage.show();
                             }else{
+                                conflictStage.hide();
                                 conflicts(primaryStage);
                             }
                         }catch(SQLException e){
