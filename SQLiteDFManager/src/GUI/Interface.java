@@ -160,6 +160,10 @@ public class Interface extends Application {
                                 if(!dfs.getTabNames().contains(df.getTableName())){
                                     throw new SQLException("This table doesn't exist");
                                 }
+                                else if(rhs.getText().equals(""))
+                                    throw new SQLException("Your right hand side is empty");
+                                else if(lhs.getText().equals(""))
+                                    throw new SQLException("Your left hand side is empty");
                                 add(df);
                                 continu.showAndWait().ifPresent(flux->{
                                     if(flux!=ButtonType.OK)
@@ -303,6 +307,7 @@ public class Interface extends Application {
     /**
      *
      * @param primaryStage
+     * @param conflicts
      * @throws SQLException
      */
     protected void conflicts(Stage primaryStage) throws SQLException{
@@ -515,7 +520,7 @@ public class Interface extends Application {
         delete(df);
     }
     private void delete(String df)throws SQLException{
-        dfs.getDB().deleteDF("lhs,rhs", df.substring(0, df.indexOf(" -")),df.substring(df.indexOf(">")+2));
+        dfs.getDB().deleteDF("lhs,rhs", df.substring(0, df.indexOf(" -")),(df.substring(df.indexOf(">")+2).equals("null")?"":df.substring(df.indexOf(">")+2)));
     }
     private boolean check3NF(String table) throws SQLException{
        return dfs.is3NF(table);           

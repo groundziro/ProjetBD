@@ -277,7 +277,7 @@ public class DFManager {
         }
         return false;
     }
-     public ArrayList<String> closure(ArrayList<String> X, ArrayList<DF> F){
+     /*public ArrayList<String> closure(ArrayList<String> X, ArrayList<DF> F){
         ArrayList<String> oldDep = new ArrayList<>();
         ArrayList<String> newDep = new ArrayList<>();
         newDep.addAll(X);
@@ -295,26 +295,41 @@ public class DFManager {
             }
         }
         return newDep;
-    }
+    }*/
     
     public ArrayList<DF> nonRedun(List<DF> G){
         ArrayList<DF> F = new ArrayList<>();
         F.addAll(G);
         for(DF df: G){
-            ArrayList<DF> newF = new ArrayList<>();
-            newF.addAll(G);
-            newF.remove(df);
-            if(member(newF,df)){
-                F=newF;
+            F.remove(df);
+            if(!member(F,df)){
+                F.add(df);
             }
         }
         return F;
     } 
+    
     public boolean member(ArrayList<DF> F, DF df){
         ArrayList<String> lhs = new ArrayList<>();
         for(String s : decomposeLhs(df))
             lhs.add(s);
         return findConsc(lhs,F).contains(df.getRhs());
+    }
+    /**
+     * 
+     * @param F set of FDs
+     * @return true if F is redundant
+     */
+    public boolean redundant(List<DF> F){
+        for(DF df : F){
+            ArrayList<DF> newF = new ArrayList<>();
+            newF.addAll(F);
+            newF.remove(df);
+            if(member(newF,df)){
+                return true;
+            }
+        }
+        return false;
     }
     /**
      * If we got the attributes in "whatWeGot",then, with the DFs "dfs", we also got the returned attributes
@@ -392,6 +407,14 @@ public class DFManager {
         List<String> cols;
         ResultSet tableData;
         ArrayList<DF> reducted = nonRedun(dfs);
+        if(redundant(dfs)){
+            for(DF df : dfs){
+                if(!reducted.contains(df)){
+                    System.out.println(df.getLhs());
+                    conflicts.add(new DFConflict(df,4,"This FD is redundant"));
+                }
+            }
+        }
         int[] rhcol;
         int lhcol;
         boolean ok;
@@ -405,10 +428,10 @@ public class DFManager {
                     ok=true;
                 }
             }
-            if(!reducted.contains(curDF)){
+            /*if(!reducted.contains(curDF)){
                 conflicts.add(new DFConflict(curDF,4,"This FD is redundant"));
-            }
-            else if(!ok){
+            }*/
+            if(!ok){
                 conflicts.add(new DFConflict(curDF,3,"No such table: '"+curDF.getTableName()+"'"));
             }
             else{
