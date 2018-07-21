@@ -326,6 +326,8 @@ public class Interface extends Application {
                             if(dfs.checkConflict().isEmpty()){
                                 conflictStage.close();
                                 primaryStage.show();
+                            }else{
+                                conflicts(primaryStage);
                             }
                         }catch(SQLException e){
                             System.out.println(e.getMessage());
