@@ -19,6 +19,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -41,9 +43,14 @@ public class Interface extends Application {
     @Override
     public void start(Stage primaryStage) {
         Button Browse = new Button("Browse");
+        Button Quit = new Button("Exit");
+        Quit.setOnAction(exit->{
+            primaryStage.close();
+        });
+        Quit.setCancelButton(true);
         BorderPane root = new BorderPane();
-        root.setPrefSize(300, 300);
-        root.setCenter(Browse);
+        root.autosize();
+        root.setCenter(new VBox(Browse,Quit));
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         Browse.setOnAction((ActionEvent actionEvent) -> {
@@ -142,17 +149,22 @@ public class Interface extends Application {
                 BorderPane choice = new BorderPane();
                 VBox v = new VBox();
                 HBox h = new HBox();
-                TextField table = new TextField();
+                ChoiceBox table = new ChoiceBox();
                 TextField lhs = new TextField();
                 TextField rhs = new TextField();
                 rhs.setPromptText("RightHandSide");
-                table.setPromptText("Table");
+             try {
+                 table.getItems().addAll(dfs.getTabNames());
+                 table.getItems().remove("FuncDep");
+             } catch (SQLException ex) {
+                 Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
+             }
                 lhs.setPromptText("LeftHandSide");
                 h.getChildren().addAll(lhs,rhs);
                 v.getChildren().addAll(table,h);
                 Button confirm = new Button("Confirm");
                 confirm.setOnAction(confirmed->{
-                    DF df = new DF(table.getText(),lhs.getText(),rhs.getText());
+                    DF df = new DF(table.getValue().toString(),lhs.getText(),rhs.getText());
                     Alert alert = new Alert(AlertType.CONFIRMATION,"Do you want to add to "+df.getTableName()+": "+df.toString());
                     alert.showAndWait().ifPresent(response->{
                         if(response == ButtonType.OK){
@@ -182,24 +194,67 @@ public class Interface extends Application {
             });
             Modify.setOnAction(mod->{
                 List<Button> dfBtns = new ArrayList<>();
-                try{
+                /*try{
                     for(ArrayList<DF> table : DFManager.orderDFList(dfs.getDFs())){
+                        dfBtns.add(new Button("stop"));
                         for(DF df: table){
                             dfBtns.add(new Button(df.toString()));
                         }
                     }
                 }catch(SQLException ex){
                     System.out.println(ex.getMessage());
-                }
+                }*/
                 BorderPane choice = new BorderPane();
                 VBox v = new VBox();
+                List<String> tabs = null;
+             try {
+                 tabs = dfs.getTabNames();
+             } catch (SQLException ex) {
+                 Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
+             }
                 HBox h = new HBox();
                 TextField lhs = new TextField();
                 TextField rhs = new TextField();
                 lhs.setPromptText("LeftHandSide");
                 rhs.setPromptText("RightHandSide");
                 h.getChildren().addAll(lhs,rhs);
-                for(Button b : dfBtns){
+                 try{
+                    for(ArrayList<DF> table : DFManager.orderDFList(dfs.getDFs())){
+                        v.getChildren().add(new Text(table.get(0).getTableName()));
+                        for(DF df: table){
+                            Button b = new Button(df.toString());
+                            b.setOnAction(mod1->{
+                            Alert alert = new Alert(AlertType.CONFIRMATION,"Would you like to modify "+b.getText()+"into "+lhs.getText()+"->"+rhs.getText(),ButtonType.APPLY,ButtonType.CANCEL);
+                            alert.showAndWait().ifPresent(cnsmr->{
+                                try{
+                                    if(cnsmr==ButtonType.APPLY&&dfs.getDB().getColNames(getDF(b.getText()).getTableName()).contains(lhs.getText())&&dfs.getDB().getColNames(getDF(b.getText()).getTableName()).contains(rhs.getText())){
+                                        modify(b.getText(),lhs.getText(),rhs.getText());
+                                        continu.showAndWait().ifPresent(flux->{
+                                            if(flux!=ButtonType.OK)
+                                                Return.fire();
+                                        });
+                                    }
+                                    else{
+                                        System.out.println(lhs.getText()+"\n"+getDF(b.getText()).getTableName()+"\n"+dfs.getDB().getColNames(getDF(b.getText()).getTableName()));
+                                        Alert warning = new Alert(AlertType.WARNING,"This FD isn't good");
+                                        warning.showAndWait();
+                                    }
+                                } catch (SQLException ex) {  
+                                    System.out.println(ex.getMessage());
+                                }
+                            });
+                        });
+                        v.getChildren().add(b);
+                        }
+                    }
+                }catch(SQLException ex){
+                    System.out.println(ex.getMessage());
+                }
+                /*for(Button b : dfBtns){
+                    if(b.getText().equals("stop")){
+                        v.getChildren().add(new Text(tabs.remove(0)));
+                        continue;
+                    }
                     b.setOnAction(mod1->{
                         Alert alert = new Alert(AlertType.CONFIRMATION,"Would you like to modify "+b.getText()+"into "+lhs.getText()+"->"+rhs.getText(),ButtonType.APPLY,ButtonType.CANCEL);
                         alert.showAndWait().ifPresent(cnsmr->{
@@ -222,7 +277,8 @@ public class Interface extends Application {
                         });
                     });
                     v.getChildren().add(b);
-                }
+                }*/
+                v.getChildren().add(new Text("To modify a FD you need to type your RightHand Side and LeftHand Side before clicking on the desired FD."));
                 h.getChildren().add(Return);
                 choice.setCenter(v);
                 choice.setBottom(h);
@@ -302,6 +358,7 @@ public class Interface extends Application {
                         primaryStage.setScene(new Scene(newChoice));
             });
             Check.setDefaultButton(true);
+            p.autosize();
             primaryStage.setScene(Tables);
     }
     /**
@@ -488,7 +545,6 @@ public class Interface extends Application {
         String copy = lhs;
         res.add((copy.contains(" ")?copy.substring(0, copy.indexOf(" ")):copy));
         while(!copy.equals(copy+"")&&!copy.equals(copy+" ")){
-            System.out.println(copy);
             copy = copy.substring(copy.indexOf(' '));
             res.add(copy.substring(0,copy.indexOf(' ')));
         }
@@ -508,7 +564,6 @@ public class Interface extends Application {
         if(dfs.getDB().getColNames(df.getTableName()).contains(df.getRhs())){
             for(String lhs: getLhs(df.getLhs())){
                 if(!dfs.getDB().getColNames(df.getTableName()).contains(lhs)){
-                    System.out.println("SHEISSE");
                     return;
                 }
             }
