@@ -14,3 +14,5 @@ SQLiteDFManager/test.db
 !/SQLiteDFManager/src/main/Key.java
 SQLiteDFManager\nbproject\private\private.xml
 SQLiteDFManager/nbproject/project.properties
+SQLiteDFManager/nbproject/private/private.xml
+*.xml
